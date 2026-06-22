@@ -1,0 +1,419 @@
+"use client";
+
+import { useState, useEffect, useCallback } from "react";
+import {
+  collection, getDocs, addDoc, updateDoc, deleteDoc,
+  doc, serverTimestamp, orderBy, query,
+} from "firebase/firestore";
+import { CldUploadWidget, CldImage } from "next-cloudinary";
+import { db } from "@/lib/firebase";
+import AdminGuard from "@/components/AdminGuard";
+import { Plus, Pencil, Trash2, ImagePlus, X, Save, Package } from "lucide-react";
+import { Produit, Categorie } from "@/types";
+import clsx from "clsx";
+
+type FormData = Omit<Produit, "id"> & { id?: string };
+
+const EMPTY_FORM: FormData = {
+  nom: "",
+  nomAr: "",
+  slug: "",
+  categorie: "cellophane",
+  description: "",
+  images: [],
+  prixDetail: 0,
+  prixGros: 0,
+  seuilGros: 10,
+  unite: "rouleau",
+  disponible: true,
+  vedette: false,
+};
+
+const CATEGORIES: { value: Categorie; label: string }[] = [
+  { value: "cellophane", label: "Cellophane (سولوفان)" },
+  { value: "serviettes", label: "Serviettes (سيرفيت)" },
+  { value: "papier-cuisson", label: "Papier Cuisson (بابي كوسون)" },
+  { value: "sacs", label: "Sacs & Rouleaux (مشوار)" },
+];
+
+const UNITES = ["rouleau", "paquet", "unité", "kg"];
+
+function toSlug(nom: string) {
+  return nom
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
+function ProduitsAdmin() {
+  const [produits, setProduits] = useState<Produit[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showForm, setShowForm] = useState(false);
+  const [form, setForm] = useState<FormData>(EMPTY_FORM);
+  const [saving, setSaving] = useState(false);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    const snap = await getDocs(query(collection(db, "produits"), orderBy("createdAt", "desc")));
+    setProduits(snap.docs.map((d) => ({ id: d.id, ...d.data() } as Produit)));
+    setLoading(false);
+  }, []);
+
+  useEffect(() => { load(); }, [load]);
+
+  const openAdd = () => { setForm(EMPTY_FORM); setShowForm(true); };
+  const openEdit = (p: Produit) => { setForm({ ...p }); setShowForm(true); };
+
+  const handleField = (field: keyof FormData, value: unknown) => {
+    setForm((f) => {
+      const updated = { ...f, [field]: value };
+      if (field === "nom") updated.slug = toSlug(value as string);
+      return updated;
+    });
+  };
+
+  const handleSave = async () => {
+    if (!form.nom || !form.prixDetail || !form.prixGros) return;
+    setSaving(true);
+    try {
+      const data = {
+        nom: form.nom,
+        nomAr: form.nomAr,
+        slug: form.slug || toSlug(form.nom),
+        categorie: form.categorie,
+        description: form.description,
+        images: form.images,
+        prixDetail: Number(form.prixDetail),
+        prixGros: Number(form.prixGros),
+        seuilGros: Number(form.seuilGros),
+        unite: form.unite,
+        disponible: form.disponible,
+        vedette: form.vedette,
+      };
+      if (form.id) {
+        await updateDoc(doc(db, "produits", form.id), data);
+      } else {
+        await addDoc(collection(db, "produits"), { ...data, createdAt: serverTimestamp() });
+      }
+      await load();
+      setShowForm(false);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    await deleteDoc(doc(db, "produits", id));
+    setProduits((p) => p.filter((x) => x.id !== id));
+    setDeleteId(null);
+  };
+
+  return (
+    <div className="container-main py-8">
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-xl font-bold text-gray-800">Gestion des produits</h1>
+        <button onClick={openAdd} className="btn-primary flex items-center gap-2 text-sm py-2.5">
+          <Plus className="w-4 h-4" />
+          Ajouter un produit
+        </button>
+      </div>
+
+      {/* Liste produits */}
+      {loading ? (
+        <div className="text-center py-16 text-gray-400">Chargement…</div>
+      ) : produits.length === 0 ? (
+        <div className="text-center py-20 bg-white rounded-2xl border border-dashed border-gray-200">
+          <Package className="w-10 h-10 text-gray-300 mx-auto mb-3" />
+          <p className="text-gray-400 text-sm mb-4">Aucun produit — ajoutez votre premier produit</p>
+          <button onClick={openAdd} className="btn-primary text-sm py-2">Ajouter</button>
+        </div>
+      ) : (
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+          <table className="w-full text-sm">
+            <thead className="bg-gray-50 border-b border-gray-100">
+              <tr>
+                {["Photo", "Produit", "Catégorie", "Prix détail", "Prix gros", "Statut", "Actions"].map((h) => (
+                  <th key={h} className="text-left px-4 py-3 font-medium text-gray-500">{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {produits.map((p) => (
+                <tr key={p.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
+                  <td className="px-4 py-3">
+                    {p.images[0] ? (
+                      <div className="relative w-14 h-14 rounded-xl overflow-hidden bg-gray-100">
+                        <CldImage
+                          src={p.images[0]}
+                          alt={p.nom}
+                          fill
+                          className="object-cover"
+                          sizes="56px"
+                        />
+                      </div>
+                    ) : (
+                      <div className="w-14 h-14 rounded-xl bg-gray-100 flex items-center justify-center">
+                        <ImagePlus className="w-4 h-4 text-gray-300" />
+                      </div>
+                    )}
+                  </td>
+                  <td className="px-4 py-3">
+                    <p className="font-medium text-gray-800">{p.nom}</p>
+                    <p className="text-xs text-gray-400">{p.nomAr}</p>
+                  </td>
+                  <td className="px-4 py-3">
+                    <span className="bg-emerald-100 text-emerald-700 text-xs px-2 py-0.5 rounded-full capitalize">
+                      {p.categorie.replace("-", " ")}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 font-semibold text-emerald-700">{p.prixDetail} MAD</td>
+                  <td className="px-4 py-3 text-gray-600">{p.prixGros} MAD</td>
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-2">
+                      <span className={clsx("w-2 h-2 rounded-full", p.disponible ? "bg-emerald-400" : "bg-gray-300")} />
+                      <span className="text-xs text-gray-500">{p.disponible ? "Disponible" : "Indispo"}</span>
+                      {p.vedette && <span className="text-xs bg-yellow-100 text-yellow-700 px-1.5 py-0.5 rounded-full">⭐ Vedette</span>}
+                    </div>
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => openEdit(p)}
+                        className="p-1.5 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
+                      >
+                        <Pencil className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => setDeleteId(p.id)}
+                        className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* Formulaire ajout/édition */}
+      {showForm && (
+        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-xl">
+            <div className="flex items-center justify-between p-6 border-b border-gray-100">
+              <h2 className="font-bold text-gray-800">{form.id ? "Modifier le produit" : "Nouveau produit"}</h2>
+              <button onClick={() => setShowForm(false)} className="text-gray-400 hover:text-gray-600">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-5">
+              {/* Photo */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Photo produit</label>
+                <div className="flex items-center gap-3 flex-wrap">
+                  {form.images[0] && (
+                    <div className="relative w-24 h-24 rounded-xl overflow-hidden bg-gray-100 border border-gray-200">
+                      <CldImage src={form.images[0]} alt="" fill className="object-cover" sizes="96px" />
+                      <button
+                        onClick={() => handleField("images", [])}
+                        className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </div>
+                  )}
+                  <CldUploadWidget
+                    uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "npit_products"}
+                    options={{ folder: "npit", maxFiles: 1, resourceType: "image" }}
+                    onSuccess={(result) => {
+                      if (result.info && typeof result.info === "object" && "public_id" in result.info) {
+                        handleField("images", [result.info.public_id as string]);
+                      }
+                    }}
+                  >
+                    {({ open }) => (
+                      <button
+                        type="button"
+                        onClick={() => open()}
+                        className="flex flex-col items-center gap-2 w-24 h-24 border-2 border-dashed border-gray-200 rounded-xl hover:border-emerald-400 transition-colors text-gray-400 hover:text-emerald-500"
+                      >
+                        <ImagePlus className="w-6 h-6 mt-5" />
+                        <span className="text-xs">Upload</span>
+                      </button>
+                    )}
+                  </CldUploadWidget>
+                </div>
+              </div>
+
+              {/* Noms */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Nom (FR) *</label>
+                  <input
+                    value={form.nom}
+                    onChange={(e) => handleField("nom", e.target.value)}
+                    placeholder="Cellophane Transparent"
+                    className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-emerald-400"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Nom (AR)</label>
+                  <input
+                    value={form.nomAr}
+                    onChange={(e) => handleField("nomAr", e.target.value)}
+                    placeholder="سولوفان شفاف"
+                    dir="rtl"
+                    className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-emerald-400"
+                  />
+                </div>
+              </div>
+
+              {/* Catégorie + Unité */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Catégorie *</label>
+                  <select
+                    value={form.categorie}
+                    onChange={(e) => handleField("categorie", e.target.value)}
+                    className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-emerald-400 bg-white"
+                  >
+                    {CATEGORIES.map((c) => <option key={c.value} value={c.value}>{c.label}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Unité *</label>
+                  <select
+                    value={form.unite}
+                    onChange={(e) => handleField("unite", e.target.value)}
+                    className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-emerald-400 bg-white"
+                  >
+                    {UNITES.map((u) => <option key={u} value={u}>{u}</option>)}
+                  </select>
+                </div>
+              </div>
+
+              {/* Description */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                <textarea
+                  value={form.description}
+                  onChange={(e) => handleField("description", e.target.value)}
+                  rows={2}
+                  placeholder="Description du produit…"
+                  className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-emerald-400 resize-none"
+                />
+              </div>
+
+              {/* Prix */}
+              <div className="grid grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Prix détail (MAD) *</label>
+                  <input
+                    type="number"
+                    value={form.prixDetail || ""}
+                    onChange={(e) => handleField("prixDetail", e.target.value)}
+                    placeholder="0"
+                    min="0"
+                    step="0.5"
+                    className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-emerald-400"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Prix gros (MAD) *</label>
+                  <input
+                    type="number"
+                    value={form.prixGros || ""}
+                    onChange={(e) => handleField("prixGros", e.target.value)}
+                    placeholder="0"
+                    min="0"
+                    step="0.5"
+                    className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-emerald-400"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Min. quantité gros</label>
+                  <input
+                    type="number"
+                    value={form.seuilGros || ""}
+                    onChange={(e) => handleField("seuilGros", e.target.value)}
+                    placeholder="50"
+                    min="1"
+                    className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-emerald-400"
+                  />
+                </div>
+              </div>
+
+              {/* Toggles */}
+              <div className="flex items-center gap-6">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <div
+                    onClick={() => handleField("disponible", !form.disponible)}
+                    className={clsx("w-10 h-5 rounded-full transition-colors relative", form.disponible ? "bg-emerald-500" : "bg-gray-200")}
+                  >
+                    <div className={clsx("absolute w-4 h-4 bg-white rounded-full top-0.5 transition-all shadow", form.disponible ? "left-5" : "left-0.5")} />
+                  </div>
+                  <span className="text-sm text-gray-700">Disponible</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <div
+                    onClick={() => handleField("vedette", !form.vedette)}
+                    className={clsx("w-10 h-5 rounded-full transition-colors relative", form.vedette ? "bg-yellow-400" : "bg-gray-200")}
+                  >
+                    <div className={clsx("absolute w-4 h-4 bg-white rounded-full top-0.5 transition-all shadow", form.vedette ? "left-5" : "left-0.5")} />
+                  </div>
+                  <span className="text-sm text-gray-700">⭐ Vedette (page d&apos;accueil)</span>
+                </label>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-3 px-6 pb-6">
+              <button onClick={() => setShowForm(false)} className="px-4 py-2.5 text-sm text-gray-600 hover:text-gray-800 transition-colors">
+                Annuler
+              </button>
+              <button
+                onClick={handleSave}
+                disabled={saving || !form.nom || !form.prixDetail || !form.prixGros}
+                className="btn-primary flex items-center gap-2 text-sm py-2.5 disabled:opacity-50"
+              >
+                <Save className="w-4 h-4" />
+                {saving ? "Enregistrement…" : "Enregistrer"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Confirmation suppression */}
+      {deleteId && (
+        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl p-6 w-80 shadow-xl">
+            <h3 className="font-bold text-gray-800 mb-2">Supprimer ce produit ?</h3>
+            <p className="text-sm text-gray-500 mb-5">Cette action est irréversible.</p>
+            <div className="flex gap-3">
+              <button onClick={() => setDeleteId(null)} className="flex-1 border border-gray-200 rounded-xl py-2.5 text-sm text-gray-600 hover:bg-gray-50">
+                Annuler
+              </button>
+              <button onClick={() => handleDelete(deleteId)} className="flex-1 bg-red-500 hover:bg-red-600 text-white rounded-xl py-2.5 text-sm font-medium transition-colors">
+                Supprimer
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default function AdminProduitsPage() {
+  return (
+    <AdminGuard>
+      <ProduitsAdmin />
+    </AdminGuard>
+  );
+}

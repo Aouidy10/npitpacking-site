@@ -1,101 +1,110 @@
-import Image from "next/image";
+import Link from "next/link";
+import { Package, Truck, BadgeCheck, Phone } from "lucide-react";
+import ProductCard from "@/components/ProductCard";
+import { PRODUITS_DEMO } from "@/lib/produits";
 
-export default function Home() {
+const CATEGORIES = [
+  { slug: "cellophane", label: "Cellophane", labelAr: "سولوفان", emoji: "🎁", color: "bg-nauma-50 border-nauma-200 text-nauma-600" },
+  { slug: "serviettes", label: "Serviettes", labelAr: "سيرفيت", emoji: "🗒️", color: "bg-nauma-teal-50 border-nauma-teal-100 text-nauma-teal" },
+  { slug: "papier-cuisson", label: "Papier Cuisson", labelAr: "بابي كوسون", emoji: "🍳", color: "bg-nauma-gold-50 border-amber-200 text-amber-700" },
+  { slug: "sacs", label: "Sacs & Rouleaux", labelAr: "مشوار", emoji: "🛍️", color: "bg-nauma-50 border-nauma-100 text-nauma-700" },
+];
+
+const AVANTAGES = [
+  { icon: Truck, titre: "Livraison Maroc", desc: "Livraison rapide dans toutes les villes du Maroc" },
+  { icon: BadgeCheck, titre: "Qualité garantie", desc: "Produits certifiés, conformes aux normes alimentaires" },
+  { icon: Package, titre: "Détail & Gros", desc: "Prix spéciaux à partir de certaines quantités" },
+  { icon: Phone, titre: "Support WhatsApp", desc: "Réponse rapide via WhatsApp pour toute commande" },
+];
+
+const PRODUITS_VEDETTES = PRODUITS_DEMO.filter((p) => p.vedette);
+
+export default function HomePage() {
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+    <>
+      {/* Hero */}
+      <section className="bg-gradient-to-br from-nauma-600 to-nauma-900 text-white">
+        <div className="container-main py-20 flex flex-col items-center text-center gap-6">
+          <span className="bg-white/20 text-white text-sm font-medium px-4 py-1 rounded-full">
+            🇲🇦 Livraison dans tout le Maroc
+          </span>
+          <h1 className="text-4xl md:text-5xl font-bold leading-tight max-w-3xl">
+            Papier & Emballage de qualité au <span className="text-nauma-teal">Meilleur Prix</span>
+          </h1>
+          <p className="text-blue-100 text-lg max-w-xl leading-relaxed">
+            Cellophane, serviettes, papier cuisson, sacs kraft — vente détail et gros pour professionnels et particuliers.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3 mt-2">
+            <Link href="/catalogue" className="btn-primary bg-white text-nauma-600 hover:bg-nauma-50">
+              Voir le catalogue
+            </Link>
+            <Link href="/devis" className="btn-outline border-white text-white hover:bg-white hover:text-nauma-600">
+              Commander en gros
+            </Link>
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+      </section>
+
+      {/* Catégories */}
+      <section className="container-main py-14">
+        <h2 className="section-title text-center mb-8">Nos Catégories</h2>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {CATEGORIES.map((cat) => (
+            <Link
+              key={cat.slug}
+              href={`/catalogue?cat=${cat.slug}`}
+              className={`border-2 rounded-2xl p-5 text-center hover:scale-105 transition-transform ${cat.color}`}
+            >
+              <div className="text-3xl mb-2">{cat.emoji}</div>
+              <div className="font-semibold text-sm">{cat.label}</div>
+              <div className="text-xs opacity-75 mt-0.5">{cat.labelAr}</div>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      {/* Produits vedettes */}
+      <section className="container-main pb-14">
+        <div className="flex items-center justify-between mb-8">
+          <h2 className="section-title">Produits Vedettes</h2>
+          <Link href="/catalogue" className="text-nauma-600 hover:text-nauma-700 text-sm font-medium">
+            Voir tout →
+          </Link>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {PRODUITS_VEDETTES.map((p) => (
+            <ProductCard key={p.id} produit={p} />
+          ))}
+        </div>
+      </section>
+
+      {/* Avantages */}
+      <section className="bg-white border-t border-gray-100">
+        <div className="container-main py-14 grid grid-cols-2 md:grid-cols-4 gap-6">
+          {AVANTAGES.map((a) => (
+            <div key={a.titre} className="flex flex-col items-center text-center gap-3">
+              <div className="bg-nauma-teal-50 text-nauma-600 p-3 rounded-xl">
+                <a.icon className="w-5 h-5" />
+              </div>
+              <h3 className="font-semibold text-sm">{a.titre}</h3>
+              <p className="text-gray-500 text-xs leading-relaxed">{a.desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* CTA Gros */}
+      <section className="container-main py-14">
+        <div className="bg-gradient-to-r from-nauma-600 to-nauma-800 rounded-3xl p-10 text-white text-center">
+          <h2 className="text-2xl md:text-3xl font-bold mb-3">Vous commandez en grande quantité ?</h2>
+          <p className="text-blue-100 mb-6 max-w-lg mx-auto">
+            Bénéficiez de tarifs préférentiels pour les commandes gros. Devis gratuit et rapide.
+          </p>
+          <Link href="/devis" className="bg-white text-nauma-600 hover:bg-nauma-50 font-semibold px-8 py-3 rounded-xl transition-colors inline-block">
+            Demander un devis gratuit
+          </Link>
+        </div>
+      </section>
+    </>
   );
 }
