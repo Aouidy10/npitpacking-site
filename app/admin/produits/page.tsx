@@ -10,6 +10,7 @@ import { db } from "@/lib/firebase";
 import AdminGuard from "@/components/AdminGuard";
 import { Plus, Pencil, Trash2, ImagePlus, X, Save, Package } from "lucide-react";
 import { Produit, Categorie } from "@/types";
+import { CATEGORIES_CONFIG } from "@/lib/categories";
 import clsx from "clsx";
 
 type FormData = Omit<Produit, "id"> & { id?: string };
@@ -18,9 +19,13 @@ const EMPTY_FORM: FormData = {
   nom: "",
   nomAr: "",
   slug: "",
-  categorie: "cellophane",
+  categorie: "hygiene",
+  sousCategorie: "",
   description: "",
   images: [],
+  poids: "",
+  colis: undefined,
+  badge: undefined,
   prixDetail: 0,
   prixGros: 0,
   seuilGros: 10,
@@ -29,14 +34,7 @@ const EMPTY_FORM: FormData = {
   vedette: false,
 };
 
-const CATEGORIES: { value: Categorie; label: string }[] = [
-  { value: "cellophane", label: "Cellophane (سولوفان)" },
-  { value: "serviettes", label: "Serviettes (سيرفيت)" },
-  { value: "papier-cuisson", label: "Papier Cuisson (بابي كوسون)" },
-  { value: "sacs", label: "Sacs & Rouleaux (مشوار)" },
-];
-
-const UNITES = ["rouleau", "paquet", "unité", "kg"];
+const UNITES = ["rouleau", "paquet", "unité", "colis", "boîte", "lot", "kg"];
 
 function toSlug(nom: string) {
   return nom
@@ -71,9 +69,13 @@ function ProduitsAdmin() {
     setForm((f) => {
       const updated = { ...f, [field]: value };
       if (field === "nom") updated.slug = toSlug(value as string);
+      if (field === "categorie") updated.sousCategorie = "";
       return updated;
     });
   };
+
+  const currentSousCats =
+    CATEGORIES_CONFIG.find((c) => c.slug === form.categorie)?.sousCats ?? [];
 
   const handleSave = async () => {
     if (!form.nom || !form.prixDetail || !form.prixGros) return;
@@ -84,8 +86,12 @@ function ProduitsAdmin() {
         nomAr: form.nomAr,
         slug: form.slug || toSlug(form.nom),
         categorie: form.categorie,
+        sousCategorie: form.sousCategorie,
         description: form.description,
         images: form.images,
+        poids: form.poids || "",
+        colis: form.colis ? Number(form.colis) : 0,
+        badge: form.badge ?? null,
         prixDetail: Number(form.prixDetail),
         prixGros: Number(form.prixGros),
         seuilGros: Number(form.seuilGros),
@@ -163,6 +169,14 @@ function ProduitsAdmin() {
                   <td className="px-4 py-3">
                     <p className="font-medium text-gray-800">{p.nom}</p>
                     <p className="text-xs text-gray-400">{p.nomAr}</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      {p.poids && (
+                        <span className="text-xs bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded-md font-medium">{p.poids}</span>
+                      )}
+                      {(p.colis ?? 0) > 0 && (
+                        <span className="text-xs bg-amber-50 text-amber-700 px-1.5 py-0.5 rounded-md font-medium">{p.colis} u/colis</span>
+                      )}
+                    </div>
                   </td>
                   <td className="px-4 py-3">
                     <span className="bg-emerald-100 text-emerald-700 text-xs px-2 py-0.5 rounded-full capitalize">
@@ -274,27 +288,70 @@ function ProduitsAdmin() {
                 </div>
               </div>
 
-              {/* Catégorie + Unité */}
+              {/* Catégorie + Sous-catégorie + Unité */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Catégorie *</label>
                   <select
                     value={form.categorie}
                     onChange={(e) => handleField("categorie", e.target.value)}
-                    className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-emerald-400 bg-white"
+                    className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-nauma-teal bg-white"
                   >
-                    {CATEGORIES.map((c) => <option key={c.value} value={c.value}>{c.label}</option>)}
+                    {CATEGORIES_CONFIG.map((c) => (
+                      <option key={c.slug} value={c.slug}>{c.label}</option>
+                    ))}
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Unité *</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Sous-catégorie *</label>
                   <select
-                    value={form.unite}
-                    onChange={(e) => handleField("unite", e.target.value)}
-                    className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-emerald-400 bg-white"
+                    value={form.sousCategorie}
+                    onChange={(e) => handleField("sousCategorie", e.target.value)}
+                    className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-nauma-teal bg-white"
                   >
-                    {UNITES.map((u) => <option key={u} value={u}>{u}</option>)}
+                    <option value="">— Choisir —</option>
+                    {currentSousCats.map((s) => (
+                      <option key={s.slug} value={s.slug}>{s.label}</option>
+                    ))}
                   </select>
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Unité *</label>
+                <select
+                  value={form.unite}
+                  onChange={(e) => handleField("unite", e.target.value)}
+                  className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-nauma-teal bg-white"
+                >
+                  {UNITES.map((u) => <option key={u} value={u}>{u}</option>)}
+                </select>
+              </div>
+
+              {/* Poids + Colis */}
+              <div className="bg-gray-50 rounded-2xl p-4 space-y-3">
+                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Poids & Conditionnement</p>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Poids / Contenance</label>
+                    <input
+                      value={form.poids}
+                      onChange={(e) => handleField("poids", e.target.value)}
+                      placeholder="ex: 350g, 1.2 kg, 30cm×45cm"
+                      className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-nauma-teal bg-white"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Unités par colis</label>
+                    <input
+                      type="number"
+                      value={form.colis || ""}
+                      onChange={(e) => handleField("colis", e.target.value)}
+                      placeholder="ex: 50, 100, 200"
+                      min="0"
+                      className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-nauma-teal bg-white"
+                    />
+                    <p className="text-xs text-gray-400 mt-1">Combien d&apos;unités dans 1 colis/carton</p>
+                  </div>
                 </div>
               </div>
 
@@ -304,8 +361,8 @@ function ProduitsAdmin() {
                 <textarea
                   value={form.description}
                   onChange={(e) => handleField("description", e.target.value)}
-                  rows={2}
-                  placeholder="Description du produit…"
+                  rows={3}
+                  placeholder="Description détaillée du produit, dimensions, matière, utilisation…"
                   className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-emerald-400 resize-none"
                 />
               </div>
@@ -346,6 +403,31 @@ function ProduitsAdmin() {
                     min="1"
                     className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-emerald-400"
                   />
+                </div>
+              </div>
+
+              {/* Badge */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Badge produit</label>
+                <div className="flex gap-2 flex-wrap">
+                  {[
+                    { val: undefined, label: "Aucun",      cls: "bg-gray-100 text-gray-500" },
+                    { val: "nouveau",    label: "🆕 Nouveau",   cls: "bg-nauma-teal text-white" },
+                    { val: "promo",      label: "🔥 Promo",     cls: "bg-red-500 text-white" },
+                    { val: "bestseller", label: "⭐ Bestseller", cls: "bg-amber-500 text-white" },
+                  ].map((b) => (
+                    <button
+                      key={String(b.val)}
+                      type="button"
+                      onClick={() => handleField("badge", b.val)}
+                      className={clsx(
+                        "px-3 py-1.5 rounded-full text-xs font-bold border-2 transition-all",
+                        form.badge === b.val ? "border-nauma-600 scale-105 " + b.cls : "border-transparent " + b.cls + " opacity-60"
+                      )}
+                    >
+                      {b.label}
+                    </button>
+                  ))}
                 </div>
               </div>
 

@@ -6,88 +6,179 @@ import { collection, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import ProductCard from "@/components/ProductCard";
 import { PRODUITS_DEMO } from "@/lib/produits";
+import { CATEGORIES_CONFIG } from "@/lib/categories";
 import { Produit, Categorie } from "@/types";
 import clsx from "clsx";
+import { ChevronRight } from "lucide-react";
 
-const CATEGORIES: { slug: Categorie | "tous"; label: string }[] = [
-  { slug: "tous", label: "Tous" },
-  { slug: "cellophane", label: "Cellophane" },
-  { slug: "serviettes", label: "Serviettes" },
-  { slug: "papier-cuisson", label: "Papier Cuisson" },
-  { slug: "sacs", label: "Sacs & Rouleaux" },
-];
-
-const VALID_CATS: (Categorie | "tous")[] = ["cellophane", "serviettes", "papier-cuisson", "sacs"];
+const VALID_CATS = CATEGORIES_CONFIG.map((c) => c.slug) as Categorie[];
 
 function CatalogueContent() {
   const searchParams = useSearchParams();
   const paramCat = searchParams.get("cat") as Categorie | null;
-  const initialCat: Categorie | "tous" = paramCat && VALID_CATS.includes(paramCat) ? paramCat : "tous";
+  const paramSub = searchParams.get("sub") ?? "";
 
-  const [categorie, setCategorie] = useState<Categorie | "tous">(initialCat);
-  const [mode, setMode] = useState<"detail" | "gros">("detail");
-  const [produits, setProduits] = useState<Produit[]>(PRODUITS_DEMO);
-  const [loading, setLoading] = useState(true);
+  const initialCat: Categorie | "tous" =
+    paramCat && VALID_CATS.includes(paramCat) ? paramCat : "tous";
+
+  const [categorie, setCategorie]       = useState<Categorie | "tous">(initialCat);
+  const [sousCategorie, setSousCategorie] = useState<string>(paramSub);
+  const [mode, setMode]                 = useState<"detail" | "gros">("detail");
+  const [produits, setProduits]         = useState<Produit[]>(PRODUITS_DEMO);
+  const [loading, setLoading]           = useState(true);
 
   useEffect(() => {
     (async () => {
       try {
         const snap = await getDocs(collection(db, "produits"));
-        if (!snap.empty) {
+        if (!snap.empty)
           setProduits(snap.docs.map((d) => ({ id: d.id, ...d.data() } as Produit)));
-        }
-      } catch {
-        // Firestore indisponible → garder PRODUITS_DEMO
-      } finally {
-        setLoading(false);
-      }
+      } catch { /* Firestore indisponible → garder PRODUITS_DEMO */ }
+      finally { setLoading(false); }
     })();
   }, []);
 
-  const produitsFiltres = useMemo(
-    () => (categorie === "tous" ? produits : produits.filter((p) => p.categorie === categorie)),
-    [categorie, produits]
-  );
+  const handleMainCat = (slug: Categorie | "tous") => {
+    setCategorie(slug);
+    setSousCategorie("");
+  };
+
+  const sousCats =
+    categorie !== "tous"
+      ? CATEGORIES_CONFIG.find((c) => c.slug === categorie)?.sousCats ?? []
+      : [];
+
+  const produitsFiltres = useMemo(() => {
+    let list = produits;
+    if (categorie !== "tous") list = list.filter((p) => p.categorie === categorie);
+    if (sousCategorie)         list = list.filter((p) => p.sousCategorie === sousCategorie);
+    return list;
+  }, [categorie, sousCategorie, produits]);
+
+  const mainCatLabel =
+    categorie !== "tous"
+      ? CATEGORIES_CONFIG.find((c) => c.slug === categorie)?.label
+      : null;
+
+  const subCatLabel = sousCategorie
+    ? sousCats.find((s) => s.slug === sousCategorie)?.label
+    : null;
 
   return (
     <div className="container-main py-10">
-      <h1 className="section-title mb-2">Catalogue</h1>
-      <p className="text-gray-500 mb-8">Tous nos produits d&apos;emballage — détail et gros.</p>
+      {/* Header + breadcrumb */}
+      <div className="mb-6">
+        <h1 className="section-title mb-1">Catalogue</h1>
+        <div className="flex items-center gap-1 text-sm text-gray-400">
+          <button onClick={() => handleMainCat("tous")} className="hover:text-nauma-600 transition-colors">
+            Tous les produits
+          </button>
+          {mainCatLabel && (
+            <>
+              <ChevronRight className="w-3.5 h-3.5" />
+              <button
+                onClick={() => setSousCategorie("")}
+                className="hover:text-nauma-600 transition-colors"
+              >
+                {mainCatLabel}
+              </button>
+            </>
+          )}
+          {subCatLabel && (
+            <>
+              <ChevronRight className="w-3.5 h-3.5" />
+              <span className="text-gray-700">{subCatLabel}</span>
+            </>
+          )}
+        </div>
+      </div>
 
-      {/* Filtres */}
-      <div className="flex flex-wrap gap-3 mb-6">
-        {CATEGORIES.map((cat) => (
+      {/* Filtre catégories principales */}
+      <div className="flex flex-wrap gap-2 mb-3">
+        <button
+          onClick={() => handleMainCat("tous")}
+          className={clsx(
+            "px-4 py-2 rounded-full text-sm font-medium border transition-all",
+            categorie === "tous"
+              ? "bg-nauma-600 text-white border-nauma-600"
+              : "bg-white text-gray-600 border-gray-200 hover:border-nauma-600 hover:text-nauma-600"
+          )}
+        >
+          Tous
+        </button>
+        {CATEGORIES_CONFIG.map((cat) => (
           <button
             key={cat.slug}
-            onClick={() => setCategorie(cat.slug)}
+            onClick={() => handleMainCat(cat.slug)}
             className={clsx(
               "px-4 py-2 rounded-full text-sm font-medium border transition-all",
               categorie === cat.slug
-                ? "bg-emerald-600 text-white border-emerald-600"
-                : "bg-white text-gray-600 border-gray-200 hover:border-emerald-400"
+                ? "bg-nauma-600 text-white border-nauma-600"
+                : "bg-white text-gray-600 border-gray-200 hover:border-nauma-600 hover:text-nauma-600"
             )}
           >
             {cat.label}
           </button>
         ))}
+
+        {/* Toggle Détail / Gros */}
         <div className="ml-auto flex bg-gray-100 rounded-full p-0.5 text-sm">
           <button
             onClick={() => setMode("detail")}
-            className={clsx("px-4 py-1.5 rounded-full font-medium transition-all", mode === "detail" ? "bg-white text-emerald-700 shadow-sm" : "text-gray-500")}
+            className={clsx(
+              "px-4 py-1.5 rounded-full font-medium transition-all",
+              mode === "detail" ? "bg-white text-nauma-700 shadow-sm" : "text-gray-500"
+            )}
           >
             Détail
           </button>
           <button
             onClick={() => setMode("gros")}
-            className={clsx("px-4 py-1.5 rounded-full font-medium transition-all", mode === "gros" ? "bg-white text-emerald-700 shadow-sm" : "text-gray-500")}
+            className={clsx(
+              "px-4 py-1.5 rounded-full font-medium transition-all",
+              mode === "gros" ? "bg-white text-nauma-700 shadow-sm" : "text-gray-500"
+            )}
           >
             Gros
           </button>
         </div>
       </div>
 
+      {/* Filtre sous-catégories */}
+      {sousCats.length > 0 && (
+        <div className="flex flex-wrap gap-2 mb-6 pl-1 border-l-2 border-nauma-teal">
+          <button
+            onClick={() => setSousCategorie("")}
+            className={clsx(
+              "px-3 py-1 rounded-full text-xs font-medium border transition-all",
+              !sousCategorie
+                ? "bg-nauma-teal text-white border-nauma-teal"
+                : "bg-white text-gray-500 border-gray-200 hover:border-nauma-teal hover:text-nauma-teal"
+            )}
+          >
+            Tous
+          </button>
+          {sousCats.map((sub) => (
+            <button
+              key={sub.slug}
+              onClick={() => setSousCategorie(sub.slug)}
+              className={clsx(
+                "px-3 py-1 rounded-full text-xs font-medium border transition-all",
+                sousCategorie === sub.slug
+                  ? "bg-nauma-teal text-white border-nauma-teal"
+                  : "bg-white text-gray-500 border-gray-200 hover:border-nauma-teal hover:text-nauma-teal"
+              )}
+            >
+              {sub.label}
+            </button>
+          ))}
+        </div>
+      )}
+
       <p className="text-sm text-gray-400 mb-4">
-        {loading ? "Chargement…" : `${produitsFiltres.length} produit${produitsFiltres.length > 1 ? "s" : ""}`}
+        {loading
+          ? "Chargement…"
+          : `${produitsFiltres.length} produit${produitsFiltres.length > 1 ? "s" : ""}`}
       </p>
 
       {produitsFiltres.length === 0 ? (

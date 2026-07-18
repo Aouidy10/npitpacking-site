@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { collection, getDocs, orderBy, query, doc, updateDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-import { RefreshCw, Clock, CheckCircle, TruckIcon, Users, MessageCircle } from "lucide-react";
+import { RefreshCw, Clock, CheckCircle, TruckIcon, Users, MessageCircle, Download } from "lucide-react";
 import AdminGuard from "@/components/AdminGuard";
 import clsx from "clsx";
 
@@ -64,6 +64,33 @@ function CommandesDashboard() {
 
   const devisFiltres = filtre === "tous" ? devis : devis.filter((d) => d.statut === filtre);
 
+  const exportCSV = (data: Devis[]) => {
+    const escape = (v: string | number | undefined) => {
+      const s = String(v ?? "").replace(/"/g, '""');
+      return `"${s}"`;
+    };
+    const headers = ["Nom", "Téléphone", "Ville", "Produit", "Quantité", "Message", "Date", "Statut"];
+    const rows = data.map((d) => [
+      escape(d.nom),
+      escape(d.telephone),
+      escape(d.ville),
+      escape(d.produit),
+      escape(d.quantite),
+      escape(d.message),
+      escape(d.createdAt?.toDate?.()?.toLocaleDateString("fr-MA") ?? ""),
+      escape(STATUTS.find((s) => s.value === d.statut)?.label ?? d.statut),
+    ].join(";"));
+
+    const csv = "﻿" + [headers.join(";"), ...rows].join("\r\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `commandes-nptipacking-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   const whatsappUrl = (d: Devis) =>
     `https://wa.me/${d.telephone.replace(/\D/g, "")}?text=${encodeURIComponent(
       `Bonjour ${d.nom}, concernant votre demande de devis pour ${d.produit} (${d.quantite} unités).`
@@ -71,12 +98,29 @@ function CommandesDashboard() {
 
   return (
     <div className="container-main py-8">
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
         <h1 className="text-xl font-bold text-gray-800">Commandes & Devis</h1>
-        <button onClick={loadDevis} className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-emerald-600 transition-colors">
-          <RefreshCw className={clsx("w-4 h-4", loading && "animate-spin")} />
-          Actualiser
-        </button>
+        <div className="flex items-center gap-2 flex-wrap">
+          <button
+            onClick={() => exportCSV(devisFiltres)}
+            disabled={devisFiltres.length === 0}
+            className="flex items-center gap-1.5 text-xs font-medium bg-emerald-600 hover:bg-emerald-700 disabled:opacity-40 text-white px-3 py-2 rounded-lg transition-colors"
+          >
+            <Download className="w-3.5 h-3.5" />
+            Exporter vue ({devisFiltres.length})
+          </button>
+          <button
+            onClick={() => exportCSV(devis)}
+            disabled={devis.length === 0}
+            className="flex items-center gap-1.5 text-xs font-medium bg-white border border-gray-200 hover:border-emerald-400 disabled:opacity-40 text-gray-600 px-3 py-2 rounded-lg transition-colors"
+          >
+            <Download className="w-3.5 h-3.5" />
+            Tout exporter ({devis.length})
+          </button>
+          <button onClick={loadDevis} className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-emerald-600 transition-colors px-2 py-2">
+            <RefreshCw className={clsx("w-4 h-4", loading && "animate-spin")} />
+          </button>
+        </div>
       </div>
 
       {/* Stats */}

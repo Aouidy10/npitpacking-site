@@ -1,9 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState } from "react";
-import { Menu, X, Package } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import clsx from "clsx";
+import SearchModal from "@/components/SearchModal";
 
 const LINKS = [
   { href: "/", label: "Accueil" },
@@ -19,10 +21,25 @@ export default function Navbar() {
   return (
     <header className="bg-white border-b border-gray-100 sticky top-0 z-40 shadow-sm">
       <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2 font-bold text-xl text-nauma-600">
-          <Package className="w-6 h-6" />
-          <span>NPTI Packing</span>
+        <Link href="/" className="flex items-center gap-2.5">
+          <Image
+            src="/logo-npit.png"
+            alt="NPITPACKING"
+            width={44}
+            height={44}
+            className="object-contain"
+            priority
+          />
+          <div className="flex flex-col leading-none">
+            <span className="font-black text-base tracking-widest text-nauma-600 uppercase">NPITPACKING</span>
+            <span className="text-[9px] font-medium text-nauma-teal tracking-wider uppercase">Division NPTI</span>
+          </div>
         </Link>
+
+        {/* Recherche */}
+        <div className="hidden md:block">
+          <SearchModal />
+        </div>
 
         {/* Desktop nav */}
         <nav className="hidden md:flex items-center gap-6">

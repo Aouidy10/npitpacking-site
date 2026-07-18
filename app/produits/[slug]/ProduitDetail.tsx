@@ -1,20 +1,63 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { MessageCircle, ChevronRight, Package } from "lucide-react";
 import { Produit } from "@/types";
 import { getCloudinaryUrl } from "@/lib/cloudinary";
+import { PRODUITS_DEMO } from "@/lib/produits";
+import { collection, getDocs, query, where } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 import clsx from "clsx";
 
-export default function ProduitDetail({ produit }: { produit: Produit }) {
-  const [mode, setMode] = useState<"detail" | "gros">("detail");
+export default function ProduitDetail({ slug }: { slug: string }) {
+  const [produit, setProduit] = useState<Produit | null>(
+    PRODUITS_DEMO.find((p) => p.slug === slug) ?? null
+  );
+  const [loading, setLoading]   = useState(!produit);
+  const [mode, setMode]         = useState<"detail" | "gros">("detail");
   const [quantite, setQuantite] = useState(1);
-  const [imgIdx, setImgIdx] = useState(0);
+  const [imgIdx, setImgIdx]     = useState(0);
 
-  const prix = mode === "gros" ? produit.prixGros : produit.prixDetail;
-  const total = prix * quantite;
+  /* Si pas trouvé dans PRODUITS_DEMO → chercher dans Firestore */
+  useEffect(() => {
+    if (produit) return;
+    (async () => {
+      try {
+        const snap = await getDocs(
+          query(collection(db, "produits"), where("slug", "==", slug))
+        );
+        if (!snap.empty) {
+          setProduit({ id: snap.docs[0].id, ...snap.docs[0].data() } as Produit);
+        }
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, [slug, produit]);
+
+  if (loading) {
+    return (
+      <div className="container-main py-20 text-center text-gray-400">
+        Chargement du produit…
+      </div>
+    );
+  }
+
+  if (!produit) {
+    return (
+      <div className="container-main py-20 text-center">
+        <Package className="w-12 h-12 text-gray-200 mx-auto mb-4" />
+        <h1 className="text-xl font-bold text-gray-700 mb-2">Produit introuvable</h1>
+        <p className="text-gray-400 text-sm mb-6">Ce produit n&apos;existe pas ou a été supprimé.</p>
+        <Link href="/catalogue" className="btn-primary">Voir le catalogue</Link>
+      </div>
+    );
+  }
+
+  const prix   = mode === "gros" ? produit.prixGros : produit.prixDetail;
+  const total  = prix * quantite;
   const remise = Math.round((1 - produit.prixGros / produit.prixDetail) * 100);
 
   const imageUrl = produit.images[imgIdx]
@@ -25,7 +68,8 @@ export default function ProduitDetail({ produit }: { produit: Produit }) {
   const whatsappUrl = `https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "212600000000"}?text=${encodeURIComponent(whatsappMsg)}`;
 
   return (
-    <div className="container-main py-10">
+    <>
+    <div className="container-main py-10 pb-28 md:pb-10">
       {/* Breadcrumb */}
       <nav className="flex items-center gap-1 text-sm text-gray-400 mb-8">
         <Link href="/" className="hover:text-nauma-600">Accueil</Link>
@@ -33,7 +77,7 @@ export default function ProduitDetail({ produit }: { produit: Produit }) {
         <Link href="/catalogue" className="hover:text-nauma-600">Catalogue</Link>
         <ChevronRight className="w-3 h-3" />
         <Link href={`/catalogue?cat=${produit.categorie}`} className="hover:text-nauma-600 capitalize">
-          {produit.categorie.replace("-", " ")}
+          {produit.categorie.replace(/-/g, " ")}
         </Link>
         <ChevronRight className="w-3 h-3" />
         <span className="text-gray-700">{produit.nom}</span>
@@ -64,10 +108,28 @@ export default function ProduitDetail({ produit }: { produit: Produit }) {
         <div className="flex flex-col gap-5">
           <div>
             <span className="bg-nauma-teal-50 text-nauma-teal text-xs font-medium px-2 py-1 rounded-full capitalize">
-              {produit.categorie.replace("-", " ")}
+              {produit.categorie.replace(/-/g, " ")}
             </span>
+            {produit.badge && (
+              <span className={clsx(
+                "ml-2 text-white text-xs font-bold px-2 py-1 rounded-full",
+                produit.badge === "nouveau"    && "bg-nauma-teal",
+                produit.badge === "promo"      && "bg-red-500",
+                produit.badge === "bestseller" && "bg-nauma-gold",
+              )}>
+                {produit.badge === "nouveau" && "✦ Nouveau"}
+                {produit.badge === "promo" && "🔥 Promo"}
+                {produit.badge === "bestseller" && "⭐ Best-seller"}
+              </span>
+            )}
             <h1 className="text-2xl font-bold text-gray-800 mt-2">{produit.nom}</h1>
             <p className="text-gray-400 text-sm">{produit.nomAr}</p>
+            {(produit.poids || produit.colis) && (
+              <div className="flex gap-2 mt-2">
+                {produit.poids && <span className="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded-md font-medium">{produit.poids}</span>}
+                {(produit.colis ?? 0) > 0 && <span className="text-xs bg-amber-50 text-amber-700 px-2 py-0.5 rounded-md font-medium">{produit.colis} u/colis</span>}
+              </div>
+            )}
           </div>
 
           <p className="text-gray-600 text-sm leading-relaxed">{produit.description}</p>
@@ -91,39 +153,67 @@ export default function ProduitDetail({ produit }: { produit: Produit }) {
             </div>
           </div>
 
-          {/* Prix */}
-          <div className="bg-gray-50 rounded-2xl p-5">
+          {/* Prix + Calculateur */}
+          <div className="bg-gray-50 rounded-2xl p-5 space-y-4">
             <div className="flex items-end gap-2">
               <span className="text-3xl font-bold text-nauma-600">{prix.toFixed(2)}</span>
               <span className="text-gray-400 pb-1">MAD / {produit.unite}</span>
+              {mode === "gros" && (
+                <span className="ml-auto bg-nauma-gold text-white text-xs font-bold px-2 py-1 rounded-full">-{remise}%</span>
+              )}
             </div>
-            {mode === "gros" && (
-              <p className="text-sm font-medium mt-1" style={{ color: "#C8A46E" }}>Économisez {remise}% par rapport au prix détail</p>
-            )}
-            {mode === "detail" && (
-              <p className="text-xs text-gray-400 mt-1">
-                Prix gros disponible à partir de {produit.seuilGros} {produit.unite}s ({produit.prixGros.toFixed(2)} MAD/{produit.unite})
-              </p>
-            )}
+
+            {/* Tableau comparatif */}
+            <div className="border border-gray-200 rounded-xl overflow-hidden text-sm">
+              <div className="grid grid-cols-3 bg-nauma-600 text-white text-xs font-semibold">
+                <div className="px-3 py-2">Quantité</div>
+                <div className="px-3 py-2">Prix / unité</div>
+                <div className="px-3 py-2">Total</div>
+              </div>
+              {[1, Math.ceil(produit.seuilGros / 2), produit.seuilGros, produit.seuilGros * 2].map((qty) => {
+                const isGros    = qty >= produit.seuilGros;
+                const unitPrice = isGros ? produit.prixGros : produit.prixDetail;
+                const isActive  = quantite === qty;
+                return (
+                  <button
+                    key={qty}
+                    type="button"
+                    onClick={() => { setQuantite(qty); setMode(isGros ? "gros" : "detail"); }}
+                    className={clsx(
+                      "grid grid-cols-3 w-full text-left border-t border-gray-100 transition-colors",
+                      isActive ? "bg-nauma-50 font-semibold" : "hover:bg-gray-50"
+                    )}
+                  >
+                    <div className={clsx("px-3 py-2 text-xs", isGros ? "text-nauma-teal font-bold" : "text-gray-600")}>
+                      {qty} {produit.unite}{qty > 1 ? "s" : ""}
+                      {isGros && <span className="ml-1 text-[10px] bg-nauma-teal text-white px-1 rounded">GROS</span>}
+                    </div>
+                    <div className="px-3 py-2 text-xs text-gray-700">{unitPrice.toFixed(2)} MAD</div>
+                    <div className={clsx("px-3 py-2 text-xs font-semibold", isGros ? "text-nauma-teal" : "text-gray-700")}>
+                      {(unitPrice * qty).toFixed(2)} MAD
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+            <p className="text-xs text-gray-400">
+              👆 Clique sur une ligne pour sélectionner — Prix gros à partir de {produit.seuilGros} {produit.unite}s
+            </p>
           </div>
 
-          {/* Quantité */}
+          {/* Quantité manuelle */}
           <div>
             <p className="text-xs text-gray-500 mb-2 font-medium uppercase tracking-wide">Quantité</p>
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setQuantite(Math.max(1, quantite - 1))}
                 className="w-9 h-9 rounded-lg border border-gray-200 flex items-center justify-center text-gray-600 hover:border-nauma-teal transition-colors"
-              >
-                −
-              </button>
+              >−</button>
               <span className="w-12 text-center font-semibold">{quantite}</span>
               <button
                 onClick={() => setQuantite(quantite + 1)}
                 className="w-9 h-9 rounded-lg border border-gray-200 flex items-center justify-center text-gray-600 hover:border-nauma-teal transition-colors"
-              >
-                +
-              </button>
+              >+</button>
               <span className="text-sm text-gray-400">{produit.unite}(s)</span>
             </div>
           </div>
@@ -156,5 +246,25 @@ export default function ProduitDetail({ produit }: { produit: Produit }) {
         </div>
       </div>
     </div>
+
+    {/* Sticky Commander — mobile uniquement */}
+    <div className="fixed bottom-0 left-0 right-0 md:hidden bg-white/95 backdrop-blur-sm border-t border-gray-200 px-4 py-3 z-40 shadow-[0_-4px_24px_rgba(0,0,0,0.10)]">
+      <div className="flex items-center gap-3 max-w-lg mx-auto">
+        <div className="flex-shrink-0">
+          <p className="text-[10px] text-gray-400 leading-tight uppercase tracking-wide">Total estimé</p>
+          <p className="font-bold text-nauma-600 text-base leading-tight">{total.toFixed(2)} MAD</p>
+        </div>
+        <a
+          href={whatsappUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex-1 bg-green-500 active:bg-green-600 text-white text-center py-3 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 transition-colors"
+        >
+          <MessageCircle className="w-4 h-4" />
+          Commander
+        </a>
+      </div>
+    </div>
+    </>
   );
 }

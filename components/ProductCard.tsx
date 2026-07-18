@@ -38,6 +38,18 @@ export default function ProductCard({ produit, defaultMode = "detail" }: Product
           <div className="absolute top-2 left-2 bg-nauma-teal-50 text-nauma-teal text-xs font-medium px-2 py-0.5 rounded-full capitalize">
             {produit.categorie.replace("-", " ")}
           </div>
+          {produit.badge && (
+            <div className={clsx(
+              "absolute top-2 right-2 text-white text-xs font-bold px-2 py-0.5 rounded-full uppercase tracking-wide",
+              produit.badge === "nouveau"    && "bg-nauma-teal",
+              produit.badge === "promo"      && "bg-red-500",
+              produit.badge === "bestseller" && "bg-nauma-gold",
+            )}>
+              {produit.badge === "nouveau"    && "Nouveau"}
+              {produit.badge === "promo"      && "Promo"}
+              {produit.badge === "bestseller" && "⭐ Top"}
+            </div>
+          )}
         </div>
       </Link>
 

@@ -1,4 +1,10 @@
-export type Categorie = "cellophane" | "serviettes" | "papier-cuisson" | "sacs";
+export type Categorie =
+  | "emballage-alimentaire"
+  | "emballage-biodegradable"
+  | "hygiene"
+  | "papier"
+  | "plastique"
+  | "verre-cristal";
 
 export interface Produit {
   id: string;
@@ -6,12 +12,16 @@ export interface Produit {
   nomAr: string;
   slug: string;
   categorie: Categorie;
+  sousCategorie: string;
   description: string;
-  images: string[]; // Cloudinary public IDs
-  prixDetail: number;    // prix unitaire détail
-  prixGros: number;      // prix unitaire gros
-  seuilGros: number;     // quantité min pour prix gros (ex: 50)
-  unite: string;         // "unité" | "rouleau" | "paquet"
+  images: string[];
+  poids?: string;
+  colis?: number;
+  badge?: "nouveau" | "promo" | "bestseller";
+  prixDetail: number;
+  prixGros: number;
+  seuilGros: number;
+  unite: string;
   disponible: boolean;
   vedette: boolean;
 }
