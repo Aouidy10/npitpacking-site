@@ -85,7 +85,7 @@ export default function ContactPage() {
             </div>
             <div>
               <p className="font-semibold text-gray-800">Email</p>
-              <p className="text-gray-600 text-sm mt-0.5">contact@nptipacking.ma</p>
+              <p className="text-gray-600 text-sm mt-0.5">contact@npitpacking.com</p>
             </div>
           </div>
 
