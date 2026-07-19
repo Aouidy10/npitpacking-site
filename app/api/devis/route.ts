@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/firebase";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import nodemailer from "nodemailer";
+
+export const runtime = "nodejs";
 
 export async function POST(req: NextRequest) {
   try {
@@ -11,7 +14,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Champs manquants" }, { status: 400 });
     }
 
-    // Sauvegarde dans Firestore
+    // 1 — Sauvegarde dans Firestore
     await addDoc(collection(db, "devis"), {
       nom,
       telephone,
@@ -23,24 +26,67 @@ export async function POST(req: NextRequest) {
       createdAt: serverTimestamp(),
     });
 
-    // Email notification via Resend (optionnel — uniquement si configuré)
-    if (process.env.RESEND_API_KEY) {
-      const { Resend } = await import("resend");
-      const resend = new Resend(process.env.RESEND_API_KEY);
-      await resend.emails.send({
-        from: "devis@npit-packaging.ma",
-        to: process.env.ADMIN_EMAIL || "admin@placeholder.ma",
-        subject: `Nouveau devis gros — ${produit} (${quantite} unités)`,
+    // 2 — Email via Namecheap SMTP
+    if (process.env.SMTP_USER && process.env.SMTP_PASS) {
+      const transporter = nodemailer.createTransport({
+        host: "mail.privateemail.com",
+        port: 587,
+        secure: false,
+        auth: {
+          user: process.env.SMTP_USER,
+          pass: process.env.SMTP_PASS,
+        },
+      });
+
+      await transporter.sendMail({
+        from: `"NPITPACKING Site" <${process.env.SMTP_USER}>`,
+        to: process.env.ADMIN_EMAIL || process.env.SMTP_USER,
+        subject: `🧾 Nouveau devis — ${produit} (${quantite} unités) — ${nom}`,
         html: `
-          <h2>Nouvelle demande de devis gros</h2>
-          <table style="border-collapse:collapse;width:100%">
-            <tr><td style="padding:8px;border:1px solid #eee"><strong>Nom</strong></td><td style="padding:8px;border:1px solid #eee">${nom}</td></tr>
-            <tr><td style="padding:8px;border:1px solid #eee"><strong>Téléphone</strong></td><td style="padding:8px;border:1px solid #eee">${telephone}</td></tr>
-            <tr><td style="padding:8px;border:1px solid #eee"><strong>Ville</strong></td><td style="padding:8px;border:1px solid #eee">${ville}</td></tr>
-            <tr><td style="padding:8px;border:1px solid #eee"><strong>Produit</strong></td><td style="padding:8px;border:1px solid #eee">${produit}</td></tr>
-            <tr><td style="padding:8px;border:1px solid #eee"><strong>Quantité</strong></td><td style="padding:8px;border:1px solid #eee">${quantite}</td></tr>
-            ${message ? `<tr><td style="padding:8px;border:1px solid #eee"><strong>Message</strong></td><td style="padding:8px;border:1px solid #eee">${message}</td></tr>` : ""}
-          </table>
+          <div style="font-family:sans-serif;max-width:600px;margin:0 auto">
+            <div style="background:#1B3266;color:white;padding:20px 24px;border-radius:12px 12px 0 0">
+              <h2 style="margin:0;font-size:18px">📦 Nouvelle demande de devis gros</h2>
+              <p style="margin:4px 0 0;opacity:0.8;font-size:13px">NPITPACKING — npitpacking.com</p>
+            </div>
+            <div style="background:#f9fafb;padding:24px;border:1px solid #e5e7eb;border-radius:0 0 12px 12px">
+              <table style="width:100%;border-collapse:collapse;font-size:14px">
+                <tr style="background:white">
+                  <td style="padding:10px 14px;border:1px solid #e5e7eb;font-weight:600;color:#374151;width:35%">Nom</td>
+                  <td style="padding:10px 14px;border:1px solid #e5e7eb;color:#111827">${nom}</td>
+                </tr>
+                <tr>
+                  <td style="padding:10px 14px;border:1px solid #e5e7eb;font-weight:600;color:#374151;background:#f9fafb">Téléphone</td>
+                  <td style="padding:10px 14px;border:1px solid #e5e7eb;color:#111827"><a href="tel:${telephone}">${telephone}</a></td>
+                </tr>
+                <tr style="background:white">
+                  <td style="padding:10px 14px;border:1px solid #e5e7eb;font-weight:600;color:#374151">Ville</td>
+                  <td style="padding:10px 14px;border:1px solid #e5e7eb;color:#111827">${ville}</td>
+                </tr>
+                <tr>
+                  <td style="padding:10px 14px;border:1px solid #e5e7eb;font-weight:600;color:#374151;background:#f9fafb">Produit</td>
+                  <td style="padding:10px 14px;border:1px solid #e5e7eb;color:#111827"><strong>${produit}</strong></td>
+                </tr>
+                <tr style="background:white">
+                  <td style="padding:10px 14px;border:1px solid #e5e7eb;font-weight:600;color:#374151">Quantité</td>
+                  <td style="padding:10px 14px;border:1px solid #e5e7eb;color:#1B3266;font-weight:700">${quantite} unités</td>
+                </tr>
+                ${message ? `
+                <tr>
+                  <td style="padding:10px 14px;border:1px solid #e5e7eb;font-weight:600;color:#374151;background:#f9fafb">Message</td>
+                  <td style="padding:10px 14px;border:1px solid #e5e7eb;color:#111827">${message}</td>
+                </tr>` : ""}
+              </table>
+              <div style="margin-top:20px;text-align:center">
+                <a href="https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER}?text=${encodeURIComponent(`Bonjour ${nom}, concernant votre devis pour ${produit} (${quantite} unités).`)}"
+                   style="background:#25D366;color:white;padding:12px 28px;border-radius:8px;text-decoration:none;font-weight:600;font-size:14px;display:inline-block">
+                  📱 Répondre via WhatsApp
+                </a>
+              </div>
+              <p style="margin-top:16px;font-size:11px;color:#9ca3af;text-align:center">
+                Reçu le ${new Date().toLocaleString("fr-MA")} — Dashboard admin : npitpacking.com/admin
+              </p>
+            </div>
+          </div>
         `,
       });
     }
