@@ -6,6 +6,13 @@ export type Categorie =
   | "plastique"
   | "verre-cristal";
 
+export interface Variante {
+  nom: string;
+  prixDetail: number;
+  prixGros: number;
+  seuilGros: number;
+}
+
 export interface Produit {
   id: string;
   nom: string;
@@ -24,6 +31,7 @@ export interface Produit {
   unite: string;
   disponible: boolean;
   vedette: boolean;
+  variantes?: Variante[];
 }
 
 export interface DevisFormData {

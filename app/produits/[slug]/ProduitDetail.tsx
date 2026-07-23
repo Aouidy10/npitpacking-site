@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { MessageCircle, ChevronRight, Package } from "lucide-react";
-import { Produit } from "@/types";
+import { Produit, Variante } from "@/types";
 import { getCloudinaryUrl } from "@/lib/cloudinary";
 import { PRODUITS_DEMO } from "@/lib/produits";
 import { collection, getDocs, query, where } from "firebase/firestore";
@@ -15,10 +15,11 @@ export default function ProduitDetail({ slug }: { slug: string }) {
   const [produit, setProduit] = useState<Produit | null>(
     PRODUITS_DEMO.find((p) => p.slug === slug) ?? null
   );
-  const [loading, setLoading]   = useState(!produit);
-  const [mode, setMode]         = useState<"detail" | "gros">("detail");
-  const [quantite, setQuantite] = useState(1);
-  const [imgIdx, setImgIdx]     = useState(0);
+  const [loading, setLoading]     = useState(!produit);
+  const [mode, setMode]           = useState<"detail" | "gros">("detail");
+  const [quantite, setQuantite]   = useState(1);
+  const [imgIdx, setImgIdx]       = useState(0);
+  const [variante, setVariante]   = useState<Variante | null>(null);
 
   /* Si pas trouvé dans PRODUITS_DEMO → chercher dans Firestore */
   useEffect(() => {
@@ -56,9 +57,15 @@ export default function ProduitDetail({ slug }: { slug: string }) {
     );
   }
 
-  const prix   = mode === "gros" ? produit.prixGros : produit.prixDetail;
+  const hasVariantes = (produit.variantes ?? []).length > 0;
+  const activeVar    = variante ?? (hasVariantes ? produit.variantes![0] : null);
+  const prixDetail   = activeVar ? activeVar.prixDetail : produit.prixDetail;
+  const prixGros     = activeVar ? activeVar.prixGros   : produit.prixGros;
+  const seuilGros    = activeVar ? activeVar.seuilGros  : produit.seuilGros;
+
+  const prix   = mode === "gros" ? prixGros : prixDetail;
   const total  = prix * quantite;
-  const remise = Math.round((1 - produit.prixGros / produit.prixDetail) * 100);
+  const remise = Math.round((1 - prixGros / prixDetail) * 100);
 
   const imageUrl = produit.images[imgIdx]
     ? getCloudinaryUrl(produit.images[imgIdx], 800)
@@ -134,6 +141,40 @@ export default function ProduitDetail({ slug }: { slug: string }) {
 
           <p className="text-gray-600 text-sm leading-relaxed">{produit.description}</p>
 
+          {/* ─── Sélecteur de variantes ─── */}
+          {hasVariantes && (
+            <div>
+              <p className="text-xs text-gray-500 mb-2 font-medium uppercase tracking-wide">
+                Choisir le type / la taille
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {produit.variantes!.map((v) => {
+                  const isSelected = (activeVar?.nom === v.nom);
+                  return (
+                    <button
+                      key={v.nom}
+                      type="button"
+                      onClick={() => { setVariante(v); setMode("detail"); setQuantite(1); }}
+                      className={clsx(
+                        "px-4 py-2 rounded-xl border-2 text-sm font-semibold transition-all",
+                        isSelected
+                          ? "border-nauma-600 bg-nauma-600 text-white shadow-md scale-105"
+                          : "border-gray-200 bg-white text-gray-700 hover:border-nauma-teal hover:text-nauma-teal"
+                      )}
+                    >
+                      {v.nom}
+                    </button>
+                  );
+                })}
+              </div>
+              {activeVar && (
+                <p className="text-xs text-nauma-teal mt-2 font-medium">
+                  ✓ Sélectionné : <strong>{activeVar.nom}</strong> — {activeVar.prixDetail.toFixed(2)} MAD / {produit.unite}
+                </p>
+              )}
+            </div>
+          )}
+
           {/* Toggle détail / gros */}
           <div>
             <p className="text-xs text-gray-500 mb-2 font-medium uppercase tracking-wide">Mode de commande</p>
@@ -148,7 +189,7 @@ export default function ProduitDetail({ slug }: { slug: string }) {
                 onClick={() => setMode("gros")}
                 className={clsx("px-5 py-2 rounded-lg font-medium transition-all", mode === "gros" ? "bg-white text-nauma-600 shadow-sm" : "text-gray-500")}
               >
-                Gros (min {produit.seuilGros} {produit.unite}s)
+                Gros (min {seuilGros} {produit.unite}s)
               </button>
             </div>
           </div>
@@ -170,9 +211,9 @@ export default function ProduitDetail({ slug }: { slug: string }) {
                 <div className="px-3 py-2">Prix / unité</div>
                 <div className="px-3 py-2">Total</div>
               </div>
-              {[1, Math.ceil(produit.seuilGros / 2), produit.seuilGros, produit.seuilGros * 2].map((qty) => {
-                const isGros    = qty >= produit.seuilGros;
-                const unitPrice = isGros ? produit.prixGros : produit.prixDetail;
+              {[1, Math.ceil(seuilGros / 2), seuilGros, seuilGros * 2].map((qty) => {
+                const isGros    = qty >= seuilGros;
+                const unitPrice = isGros ? prixGros : prixDetail;
                 const isActive  = quantite === qty;
                 return (
                   <button
@@ -197,7 +238,7 @@ export default function ProduitDetail({ slug }: { slug: string }) {
               })}
             </div>
             <p className="text-xs text-gray-400">
-              👆 Clique sur une ligne pour sélectionner — Prix gros à partir de {produit.seuilGros} {produit.unite}s
+              👆 Clique sur une ligne pour sélectionner — Prix gros à partir de {seuilGros} {produit.unite}s
             </p>
           </div>
 

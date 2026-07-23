@@ -9,7 +9,7 @@ import { CldUploadWidget, CldImage } from "next-cloudinary";
 import { db } from "@/lib/firebase";
 import AdminGuard from "@/components/AdminGuard";
 import { Plus, Pencil, Trash2, ImagePlus, X, Save, Package } from "lucide-react";
-import { Produit, Categorie } from "@/types";
+import { Produit, Categorie, Variante } from "@/types";
 import { CATEGORIES_CONFIG } from "@/lib/categories";
 import clsx from "clsx";
 
@@ -32,7 +32,10 @@ const EMPTY_FORM: FormData = {
   unite: "rouleau",
   disponible: true,
   vedette: false,
+  variantes: [],
 };
+
+const EMPTY_VARIANTE: Variante = { nom: "", prixDetail: 0, prixGros: 0, seuilGros: 10 };
 
 const UNITES = ["rouleau", "paquet", "unité", "colis", "boîte", "lot", "kg"];
 
@@ -81,6 +84,8 @@ function ProduitsAdmin() {
     if (!form.nom || !form.prixDetail || !form.prixGros) return;
     setSaving(true);
     try {
+      const hasVariantes = (form.variantes ?? []).length > 0;
+      const firstVar = form.variantes?.[0];
       const data = {
         nom: form.nom,
         nomAr: form.nomAr,
@@ -92,12 +97,18 @@ function ProduitsAdmin() {
         poids: form.poids || "",
         colis: form.colis ? Number(form.colis) : 0,
         badge: form.badge ?? null,
-        prixDetail: Number(form.prixDetail),
-        prixGros: Number(form.prixGros),
-        seuilGros: Number(form.seuilGros),
+        prixDetail: hasVariantes && firstVar ? Number(firstVar.prixDetail) : Number(form.prixDetail),
+        prixGros:   hasVariantes && firstVar ? Number(firstVar.prixGros)   : Number(form.prixGros),
+        seuilGros:  hasVariantes && firstVar ? Number(firstVar.seuilGros)  : Number(form.seuilGros),
         unite: form.unite,
         disponible: form.disponible,
         vedette: form.vedette,
+        variantes: (form.variantes ?? []).map((v) => ({
+          nom: v.nom,
+          prixDetail: Number(v.prixDetail),
+          prixGros: Number(v.prixGros),
+          seuilGros: Number(v.seuilGros),
+        })),
       };
       if (form.id) {
         await updateDoc(doc(db, "produits", form.id), data);
@@ -429,6 +440,112 @@ function ProduitsAdmin() {
                     </button>
                   ))}
                 </div>
+              </div>
+
+              {/* Variantes / Types */}
+              <div className="bg-blue-50 rounded-2xl p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-xs font-bold text-blue-700 uppercase tracking-wider">Variantes / Types</p>
+                    <p className="text-xs text-blue-500 mt-0.5">Ex: 8m / 30m / 200m — 100cc / 250cc / 500cc</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleField("variantes", (form.variantes ?? []).length > 0 ? [] : [{ ...EMPTY_VARIANTE }])}
+                    className={clsx(
+                      "w-10 h-5 rounded-full transition-colors relative flex-shrink-0",
+                      (form.variantes ?? []).length > 0 ? "bg-blue-500" : "bg-gray-200"
+                    )}
+                  >
+                    <div className={clsx(
+                      "absolute w-4 h-4 bg-white rounded-full top-0.5 transition-all shadow",
+                      (form.variantes ?? []).length > 0 ? "left-5" : "left-0.5"
+                    )} />
+                  </button>
+                </div>
+
+                {(form.variantes ?? []).length > 0 && (
+                  <div className="space-y-2">
+                    {/* En-tête tableau */}
+                    <div className="grid grid-cols-12 gap-1 text-xs font-medium text-blue-600 px-1">
+                      <div className="col-span-3">Nom/Taille</div>
+                      <div className="col-span-3">Prix détail</div>
+                      <div className="col-span-3">Prix gros</div>
+                      <div className="col-span-2">Min. gros</div>
+                      <div className="col-span-1" />
+                    </div>
+                    {(form.variantes ?? []).map((v, i) => (
+                      <div key={i} className="grid grid-cols-12 gap-1 items-center">
+                        <input
+                          value={v.nom}
+                          onChange={(e) => {
+                            const vars = [...(form.variantes ?? [])];
+                            vars[i] = { ...vars[i], nom: e.target.value };
+                            handleField("variantes", vars);
+                          }}
+                          placeholder="ex: 8m, 100cc"
+                          className="col-span-3 border border-blue-200 rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:border-blue-400 bg-white"
+                        />
+                        <input
+                          type="number"
+                          value={v.prixDetail || ""}
+                          onChange={(e) => {
+                            const vars = [...(form.variantes ?? [])];
+                            vars[i] = { ...vars[i], prixDetail: Number(e.target.value) };
+                            handleField("variantes", vars);
+                          }}
+                          placeholder="0"
+                          min="0"
+                          step="0.5"
+                          className="col-span-3 border border-blue-200 rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:border-blue-400 bg-white"
+                        />
+                        <input
+                          type="number"
+                          value={v.prixGros || ""}
+                          onChange={(e) => {
+                            const vars = [...(form.variantes ?? [])];
+                            vars[i] = { ...vars[i], prixGros: Number(e.target.value) };
+                            handleField("variantes", vars);
+                          }}
+                          placeholder="0"
+                          min="0"
+                          step="0.5"
+                          className="col-span-3 border border-blue-200 rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:border-blue-400 bg-white"
+                        />
+                        <input
+                          type="number"
+                          value={v.seuilGros || ""}
+                          onChange={(e) => {
+                            const vars = [...(form.variantes ?? [])];
+                            vars[i] = { ...vars[i], seuilGros: Number(e.target.value) };
+                            handleField("variantes", vars);
+                          }}
+                          placeholder="10"
+                          min="1"
+                          className="col-span-2 border border-blue-200 rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:border-blue-400 bg-white"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const vars = (form.variantes ?? []).filter((_, idx) => idx !== i);
+                            handleField("variantes", vars);
+                          }}
+                          className="col-span-1 flex items-center justify-center text-red-400 hover:text-red-600"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={() => handleField("variantes", [...(form.variantes ?? []), { ...EMPTY_VARIANTE }])}
+                      className="w-full border-2 border-dashed border-blue-200 text-blue-500 hover:border-blue-400 hover:bg-blue-50 text-xs font-medium py-2 rounded-xl transition-colors flex items-center justify-center gap-1"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      Ajouter une variante
+                    </button>
+                  </div>
+                )}
               </div>
 
               {/* Toggles */}
