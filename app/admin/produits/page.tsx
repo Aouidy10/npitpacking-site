@@ -33,6 +33,7 @@ const EMPTY_FORM: FormData = {
   disponible: true,
   vedette: false,
   variantes: [],
+  variantesLabel: "",
 };
 
 const EMPTY_VARIANTE: Variante = { nom: "", prixDetail: 0, prixGros: 0, seuilGros: 10 };
@@ -109,6 +110,7 @@ function ProduitsAdmin() {
           prixGros: Number(v.prixGros),
           seuilGros: Number(v.seuilGros),
         })),
+        variantesLabel: form.variantesLabel || "",
       };
       if (form.id) {
         await updateDoc(doc(db, "produits", form.id), data);
@@ -447,7 +449,7 @@ function ProduitsAdmin() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs font-bold text-blue-700 uppercase tracking-wider">Variantes / Types</p>
-                    <p className="text-xs text-blue-500 mt-0.5">Ex: 8m / 30m / 200m — 100cc / 250cc / 500cc</p>
+                    <p className="text-xs text-blue-500 mt-0.5">Ex: 8m / 30m — Petit / Moyen / Grand — 100cc / 500cc</p>
                   </div>
                   <button
                     type="button"
@@ -465,7 +467,36 @@ function ProduitsAdmin() {
                 </div>
 
                 {(form.variantes ?? []).length > 0 && (
-                  <div className="space-y-2">
+                  <div className="space-y-3">
+                    {/* Label des variantes */}
+                    <div>
+                      <label className="block text-xs font-medium text-blue-700 mb-1">
+                        Label du filtre (affiché au client)
+                      </label>
+                      <div className="flex gap-2 flex-wrap mb-2">
+                        {["Longueur", "Taille", "Capacité", "Format", "Poids", "Volume"].map((preset) => (
+                          <button
+                            key={preset}
+                            type="button"
+                            onClick={() => handleField("variantesLabel", preset)}
+                            className={clsx(
+                              "px-2.5 py-1 rounded-full text-xs font-medium border transition-all",
+                              form.variantesLabel === preset
+                                ? "bg-blue-500 text-white border-blue-500"
+                                : "bg-white text-blue-600 border-blue-200 hover:border-blue-400"
+                            )}
+                          >
+                            {preset}
+                          </button>
+                        ))}
+                      </div>
+                      <input
+                        value={form.variantesLabel ?? ""}
+                        onChange={(e) => handleField("variantesLabel", e.target.value)}
+                        placeholder="ou tape un label personnalisé..."
+                        className="w-full border border-blue-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-blue-400 bg-white"
+                      />
+                    </div>
                     {/* En-tête tableau */}
                     <div className="grid grid-cols-12 gap-1 text-xs font-medium text-blue-600 px-1">
                       <div className="col-span-3">Nom/Taille</div>

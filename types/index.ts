@@ -32,6 +32,7 @@ export interface Produit {
   disponible: boolean;
   vedette: boolean;
   variantes?: Variante[];
+  variantesLabel?: string;
 }
 
 export interface DevisFormData {

@@ -145,7 +145,7 @@ export default function ProduitDetail({ slug }: { slug: string }) {
           {hasVariantes && (
             <div>
               <p className="text-xs text-gray-500 mb-2 font-medium uppercase tracking-wide">
-                Choisir le type / la taille
+                {produit.variantesLabel ? `Choisir : ${produit.variantesLabel}` : "Choisir le type"}
               </p>
               <div className="flex flex-wrap gap-2">
                 {produit.variantes!.map((v) => {
