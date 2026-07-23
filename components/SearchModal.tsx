@@ -7,7 +7,7 @@ import Image from "next/image";
 import { PRODUITS_DEMO } from "@/lib/produits";
 import { getCloudinaryUrl } from "@/lib/cloudinary";
 
-export default function SearchModal() {
+export default function SearchModal({ variant }: { variant?: "bar" | "icon" }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
@@ -38,15 +38,25 @@ export default function SearchModal() {
   return (
     <>
       {/* Bouton recherche dans navbar */}
-      <button
-        onClick={() => setOpen(true)}
-        className="flex items-center gap-2 text-gray-500 hover:text-nauma-600 bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded-lg text-sm transition-colors"
-        aria-label="Rechercher"
-      >
-        <Search className="w-4 h-4" />
-        <span className="hidden md:block text-gray-400 text-xs">Rechercher… </span>
-        <kbd className="hidden md:block text-gray-300 text-xs bg-white border border-gray-200 px-1 rounded">Ctrl K</kbd>
-      </button>
+      {variant === "bar" ? (
+        <button
+          onClick={() => setOpen(true)}
+          className="w-full flex items-center gap-3 text-gray-400 bg-gray-100 hover:bg-gray-200 px-4 py-2 border border-gray-200 text-sm transition-colors text-left"
+          aria-label="Rechercher"
+        >
+          <Search className="w-4 h-4 flex-shrink-0" />
+          <span className="flex-1">Rechercher un produit…</span>
+          <kbd className="text-gray-300 text-xs bg-white border border-gray-200 px-1.5 py-0.5">Ctrl K</kbd>
+        </button>
+      ) : (
+        <button
+          onClick={() => setOpen(true)}
+          className="flex items-center gap-2 text-gray-500 hover:text-nauma-600 bg-gray-100 hover:bg-gray-200 px-3 py-1.5 text-sm transition-colors"
+          aria-label="Rechercher"
+        >
+          <Search className="w-4 h-4" />
+        </button>
+      )}
 
       {/* Modal overlay */}
       {open && (
