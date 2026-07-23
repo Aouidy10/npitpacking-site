@@ -143,23 +143,30 @@ export default function ProduitDetail({ slug }: { slug: string }) {
 
           {/* ─── Sélecteur de variantes ─── */}
           {hasVariantes && (
-            <div>
-              <p className="text-xs text-gray-500 mb-2 font-medium uppercase tracking-wide">
-                {produit.variantesLabel ? `Choisir : ${produit.variantesLabel}` : "Choisir le type"}
+            <div className="space-y-2">
+              {/* Label + valeur sélectionnée */}
+              <p className="text-xs font-bold text-gray-700 uppercase tracking-widest">
+                {produit.variantesLabel || "TYPE"}
+                {activeVar && (
+                  <span className="font-normal text-nauma-600 ml-1 normal-case tracking-normal">
+                    : {activeVar.nom}
+                  </span>
+                )}
               </p>
+              {/* Boutons variantes */}
               <div className="flex flex-wrap gap-2">
                 {produit.variantes!.map((v) => {
-                  const isSelected = (activeVar?.nom === v.nom);
+                  const isSelected = activeVar?.nom === v.nom;
                   return (
                     <button
                       key={v.nom}
                       type="button"
                       onClick={() => { setVariante(v); setMode("detail"); setQuantite(1); }}
                       className={clsx(
-                        "px-4 py-2 rounded-xl border-2 text-sm font-semibold transition-all",
+                        "px-3.5 py-1.5 border text-sm font-medium transition-all rounded-md",
                         isSelected
-                          ? "border-nauma-600 bg-nauma-600 text-white shadow-md scale-105"
-                          : "border-gray-200 bg-white text-gray-700 hover:border-nauma-teal hover:text-nauma-teal"
+                          ? "border-gray-800 bg-white text-gray-800 shadow-sm"
+                          : "border-gray-300 bg-white text-gray-600 hover:border-gray-500"
                       )}
                     >
                       {v.nom}
@@ -167,11 +174,6 @@ export default function ProduitDetail({ slug }: { slug: string }) {
                   );
                 })}
               </div>
-              {activeVar && (
-                <p className="text-xs text-nauma-teal mt-2 font-medium">
-                  ✓ Sélectionné : <strong>{activeVar.nom}</strong> — {activeVar.prixDetail.toFixed(2)} MAD / {produit.unite}
-                </p>
-              )}
             </div>
           )}
 
