@@ -3,10 +3,11 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { MessageCircle, ChevronRight, Package } from "lucide-react";
+import { ChevronRight, ChevronLeft, Minus, Plus, Package, MessageCircle } from "lucide-react";
 import { Produit, Variante } from "@/types";
 import { getCloudinaryUrl } from "@/lib/cloudinary";
 import { PRODUITS_DEMO } from "@/lib/produits";
+import { CATEGORIES_CONFIG } from "@/lib/categories";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import clsx from "clsx";
@@ -15,13 +16,11 @@ export default function ProduitDetail({ slug }: { slug: string }) {
   const [produit, setProduit] = useState<Produit | null>(
     PRODUITS_DEMO.find((p) => p.slug === slug) ?? null
   );
-  const [loading, setLoading]     = useState(!produit);
-  const [mode, setMode]           = useState<"detail" | "gros">("detail");
-  const [quantite, setQuantite]   = useState(1);
-  const [imgIdx, setImgIdx]       = useState(0);
-  const [variante, setVariante]   = useState<Variante | null>(null);
+  const [loading, setLoading]   = useState(!produit);
+  const [imgIdx, setImgIdx]     = useState(0);
+  const [variante, setVariante] = useState<Variante | null>(null);
+  const [quantite, setQuantite] = useState(1);
 
-  /* Si pas trouvé dans PRODUITS_DEMO → chercher dans Firestore */
   useEffect(() => {
     if (produit) return;
     (async () => {
@@ -29,9 +28,8 @@ export default function ProduitDetail({ slug }: { slug: string }) {
         const snap = await getDocs(
           query(collection(db, "produits"), where("slug", "==", slug))
         );
-        if (!snap.empty) {
+        if (!snap.empty)
           setProduit({ id: snap.docs[0].id, ...snap.docs[0].data() } as Produit);
-        }
       } finally {
         setLoading(false);
       }
@@ -39,16 +37,12 @@ export default function ProduitDetail({ slug }: { slug: string }) {
   }, [slug, produit]);
 
   if (loading) {
-    return (
-      <div className="container-main py-20 text-center text-gray-400">
-        Chargement du produit…
-      </div>
-    );
+    return <div className="container-main py-24 text-center text-gray-400">Chargement…</div>;
   }
 
   if (!produit) {
     return (
-      <div className="container-main py-20 text-center">
+      <div className="container-main py-24 text-center">
         <Package className="w-12 h-12 text-gray-200 mx-auto mb-4" />
         <h1 className="text-xl font-bold text-gray-700 mb-2">Produit introuvable</h1>
         <p className="text-gray-400 text-sm mb-6">Ce produit n&apos;existe pas ou a été supprimé.</p>
@@ -57,257 +51,272 @@ export default function ProduitDetail({ slug }: { slug: string }) {
     );
   }
 
-  const hasVariantes = (produit.variantes ?? []).length > 0;
-  const activeVar    = variante ?? (hasVariantes ? produit.variantes![0] : null);
-  const prixDetail   = activeVar ? activeVar.prixDetail : produit.prixDetail;
-  const prixGros     = activeVar ? activeVar.prixGros   : produit.prixGros;
-  const seuilGros    = activeVar ? activeVar.seuilGros  : produit.seuilGros;
+  const hasVariantes  = (produit.variantes ?? []).length > 0;
+  const activeVar     = variante ?? (hasVariantes ? produit.variantes![0] : null);
+  const catConfig     = CATEGORIES_CONFIG.find((c) => c.slug === produit.categorie);
+  const catLabel      = catConfig?.label ?? produit.categorie;
 
-  const prix   = mode === "gros" ? prixGros : prixDetail;
-  const total  = prix * quantite;
-  const remise = Math.round((1 - prixGros / prixDetail) * 100);
-
-  const imageUrl = produit.images[imgIdx]
-    ? getCloudinaryUrl(produit.images[imgIdx], 800)
+  const images = produit.images.length > 0 ? produit.images : [];
+  const currentImg = images[imgIdx]
+    ? getCloudinaryUrl(images[imgIdx], 800)
     : "/placeholder-product.svg";
 
-  const whatsappMsg = `Bonjour, je voudrais commander :\n- Produit : ${produit.nom}\n- Mode : ${mode === "gros" ? "Gros" : "Détail"}\n- Quantité : ${quantite} ${produit.unite}(s)\n- Total estimé : ${total.toFixed(2)} MAD`;
-  const whatsappUrl = `https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "212600000000"}?text=${encodeURIComponent(whatsappMsg)}`;
+  const whatsappMsg = `Bonjour, je voudrais commander :\n- Produit : ${produit.nom}${activeVar ? `\n- Type : ${activeVar.nom}` : ""}\n- Quantité : ${quantite} ${produit.unite}(s)`;
+  const whatsappUrl = `https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "212600000000"}?text=${encodeURIComponent(whatsappMsg)}`;
+
+  const prevImg = () => setImgIdx((i) => (i - 1 + images.length) % images.length);
+  const nextImg = () => setImgIdx((i) => (i + 1) % images.length);
 
   return (
     <>
-    <div className="container-main py-10 pb-28 md:pb-10">
-      {/* Breadcrumb */}
-      <nav className="flex items-center gap-1 text-sm text-gray-400 mb-8">
-        <Link href="/" className="hover:text-nauma-600">Accueil</Link>
-        <ChevronRight className="w-3 h-3" />
-        <Link href="/catalogue" className="hover:text-nauma-600">Catalogue</Link>
-        <ChevronRight className="w-3 h-3" />
-        <Link href={`/catalogue?cat=${produit.categorie}`} className="hover:text-nauma-600 capitalize">
-          {produit.categorie.replace(/-/g, " ")}
-        </Link>
-        <ChevronRight className="w-3 h-3" />
-        <span className="text-gray-700">{produit.nom}</span>
-      </nav>
-
-      <div className="grid md:grid-cols-2 gap-10">
-        {/* Images */}
-        <div>
-          <div className="relative h-80 md:h-96 bg-gray-100 rounded-2xl overflow-hidden">
-            <Image src={imageUrl} alt={produit.nom} fill className="object-cover" sizes="(max-width: 768px) 100vw, 50vw" />
-          </div>
-          {produit.images.length > 1 && (
-            <div className="flex gap-2 mt-3">
-              {produit.images.map((img, i) => (
-                <button
-                  key={i}
-                  onClick={() => setImgIdx(i)}
-                  className={clsx("relative w-16 h-16 rounded-lg overflow-hidden border-2 transition-all", imgIdx === i ? "border-nauma-teal" : "border-gray-200")}
+      {/* ─── Breadcrumb ─────────────────────────────────── */}
+      <div className="border-b border-gray-100 bg-white">
+        <div className="container-main py-3">
+          <nav className="flex items-center gap-1.5 text-xs text-gray-400 flex-wrap">
+            <Link href="/" className="hover:text-nauma-600 transition-colors">Accueil</Link>
+            <span>/</span>
+            <Link href="/catalogue" className="hover:text-nauma-600 transition-colors">Catalogue</Link>
+            <span>/</span>
+            <Link href={`/catalogue?cat=${produit.categorie}`} className="hover:text-nauma-600 transition-colors">
+              {catLabel}
+            </Link>
+            {produit.sousCategorie && (
+              <>
+                <span>/</span>
+                <Link
+                  href={`/catalogue?cat=${produit.categorie}&sub=${produit.sousCategorie}`}
+                  className="hover:text-nauma-600 transition-colors"
                 >
-                  <Image src={getCloudinaryUrl(img, 100)} alt="" fill className="object-cover" sizes="64px" />
-                </button>
-              ))}
-            </div>
-          )}
+                  {catConfig?.sousCats.find((s) => s.slug === produit.sousCategorie)?.label ?? produit.sousCategorie}
+                </Link>
+              </>
+            )}
+            <span>/</span>
+            <span className="text-gray-600">{produit.nom}</span>
+          </nav>
         </div>
+      </div>
 
-        {/* Infos produit */}
-        <div className="flex flex-col gap-5">
+      {/* ─── Contenu produit ────────────────────────────── */}
+      <div className="container-main py-10 pb-28 md:pb-10">
+        <div className="grid md:grid-cols-2 gap-12 items-start">
+
+          {/* ── Galerie image ─────────────────────────────── */}
           <div>
-            <span className="bg-nauma-teal-50 text-nauma-teal text-xs font-medium px-2 py-1 rounded-full capitalize">
-              {produit.categorie.replace(/-/g, " ")}
-            </span>
-            {produit.badge && (
-              <span className={clsx(
-                "ml-2 text-white text-xs font-bold px-2 py-1 rounded-full",
-                produit.badge === "nouveau"    && "bg-nauma-teal",
-                produit.badge === "promo"      && "bg-red-500",
-                produit.badge === "bestseller" && "bg-nauma-gold",
-              )}>
-                {produit.badge === "nouveau" && "✦ Nouveau"}
-                {produit.badge === "promo" && "🔥 Promo"}
-                {produit.badge === "bestseller" && "⭐ Best-seller"}
-              </span>
-            )}
-            <h1 className="text-2xl font-bold text-gray-800 mt-2">{produit.nom}</h1>
-            <p className="text-gray-400 text-sm">{produit.nomAr}</p>
-            {(produit.poids || produit.colis) && (
-              <div className="flex gap-2 mt-2">
-                {produit.poids && <span className="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded-md font-medium">{produit.poids}</span>}
-                {(produit.colis ?? 0) > 0 && <span className="text-xs bg-amber-50 text-amber-700 px-2 py-0.5 rounded-md font-medium">{produit.colis} u/colis</span>}
-              </div>
-            )}
-          </div>
+            {/* Image principale */}
+            <div className="relative bg-gray-50 border border-gray-100 overflow-hidden"
+              style={{ paddingBottom: "100%" }}>
+              <Image
+                src={currentImg}
+                alt={produit.nom}
+                fill
+                className="object-contain p-6"
+                sizes="(max-width: 768px) 100vw, 50vw"
+                priority
+              />
 
-          <p className="text-gray-600 text-sm leading-relaxed">{produit.description}</p>
+              {/* Badge */}
+              {produit.badge && (
+                <span className={clsx(
+                  "absolute top-3 left-3 text-white text-[10px] font-extrabold px-2.5 py-1 uppercase tracking-widest",
+                  produit.badge === "nouveau"    && "bg-nauma-teal",
+                  produit.badge === "promo"      && "bg-red-500",
+                  produit.badge === "bestseller" && "bg-nauma-gold",
+                )}>
+                  {produit.badge === "nouveau"    && "Nouveau"}
+                  {produit.badge === "promo"      && "Promo"}
+                  {produit.badge === "bestseller" && "Top vente"}
+                </span>
+              )}
 
-          {/* ─── Sélecteur de variantes ─── */}
-          {hasVariantes && (
-            <div className="space-y-2">
-              {/* Label + valeur sélectionnée */}
-              <p className="text-xs font-bold text-gray-700 uppercase tracking-widest">
-                {produit.variantesLabel || "TYPE"}
-                {activeVar && (
-                  <span className="font-normal text-nauma-600 ml-1 normal-case tracking-normal">
-                    : {activeVar.nom}
-                  </span>
-                )}
-              </p>
-              {/* Boutons variantes */}
-              <div className="flex flex-wrap gap-2">
-                {produit.variantes!.map((v) => {
-                  const isSelected = activeVar?.nom === v.nom;
-                  return (
-                    <button
-                      key={v.nom}
-                      type="button"
-                      onClick={() => { setVariante(v); setMode("detail"); setQuantite(1); }}
-                      className={clsx(
-                        "px-3.5 py-1.5 border text-sm font-medium transition-all rounded-md",
-                        isSelected
-                          ? "border-gray-800 bg-white text-gray-800 shadow-sm"
-                          : "border-gray-300 bg-white text-gray-600 hover:border-gray-500"
-                      )}
-                    >
-                      {v.nom}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* Toggle détail / gros */}
-          <div>
-            <p className="text-xs text-gray-500 mb-2 font-medium uppercase tracking-wide">Mode de commande</p>
-            <div className="flex bg-gray-100 rounded-xl p-1 text-sm w-fit">
-              <button
-                onClick={() => setMode("detail")}
-                className={clsx("px-5 py-2 rounded-lg font-medium transition-all", mode === "detail" ? "bg-white text-nauma-600 shadow-sm" : "text-gray-500")}
-              >
-                Détail
-              </button>
-              <button
-                onClick={() => setMode("gros")}
-                className={clsx("px-5 py-2 rounded-lg font-medium transition-all", mode === "gros" ? "bg-white text-nauma-600 shadow-sm" : "text-gray-500")}
-              >
-                Gros (min {seuilGros} {produit.unite}s)
-              </button>
-            </div>
-          </div>
-
-          {/* Prix + Calculateur */}
-          <div className="bg-gray-50 rounded-2xl p-5 space-y-4">
-            <div className="flex items-end gap-2">
-              <span className="text-3xl font-bold text-nauma-600">{prix.toFixed(2)}</span>
-              <span className="text-gray-400 pb-1">MAD / {produit.unite}</span>
-              {mode === "gros" && (
-                <span className="ml-auto bg-nauma-gold text-white text-xs font-bold px-2 py-1 rounded-full">-{remise}%</span>
+              {/* Flèches navigation */}
+              {images.length > 1 && (
+                <>
+                  <button
+                    onClick={prevImg}
+                    className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white shadow-md flex items-center justify-center hover:bg-gray-50 transition-colors border border-gray-100"
+                  >
+                    <ChevronLeft className="w-4 h-4 text-gray-600" />
+                  </button>
+                  <button
+                    onClick={nextImg}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white shadow-md flex items-center justify-center hover:bg-gray-50 transition-colors border border-gray-100"
+                  >
+                    <ChevronRight className="w-4 h-4 text-gray-600" />
+                  </button>
+                </>
               )}
             </div>
 
-            {/* Tableau comparatif */}
-            <div className="border border-gray-200 rounded-xl overflow-hidden text-sm">
-              <div className="grid grid-cols-3 bg-nauma-600 text-white text-xs font-semibold">
-                <div className="px-3 py-2">Quantité</div>
-                <div className="px-3 py-2">Prix / unité</div>
-                <div className="px-3 py-2">Total</div>
-              </div>
-              {[1, Math.ceil(seuilGros / 2), seuilGros, seuilGros * 2].map((qty) => {
-                const isGros    = qty >= seuilGros;
-                const unitPrice = isGros ? prixGros : prixDetail;
-                const isActive  = quantite === qty;
-                return (
+            {/* Miniatures */}
+            {images.length > 1 && (
+              <div className="flex gap-2 mt-3 overflow-x-auto">
+                {images.map((img, i) => (
                   <button
-                    key={qty}
-                    type="button"
-                    onClick={() => { setQuantite(qty); setMode(isGros ? "gros" : "detail"); }}
+                    key={i}
+                    onClick={() => setImgIdx(i)}
                     className={clsx(
-                      "grid grid-cols-3 w-full text-left border-t border-gray-100 transition-colors",
-                      isActive ? "bg-nauma-50 font-semibold" : "hover:bg-gray-50"
+                      "relative flex-shrink-0 w-16 h-16 border-2 overflow-hidden bg-gray-50 transition-all",
+                      imgIdx === i ? "border-nauma-600" : "border-gray-200 hover:border-gray-400"
                     )}
                   >
-                    <div className={clsx("px-3 py-2 text-xs", isGros ? "text-nauma-teal font-bold" : "text-gray-600")}>
-                      {qty} {produit.unite}{qty > 1 ? "s" : ""}
-                      {isGros && <span className="ml-1 text-[10px] bg-nauma-teal text-white px-1 rounded">GROS</span>}
-                    </div>
-                    <div className="px-3 py-2 text-xs text-gray-700">{unitPrice.toFixed(2)} MAD</div>
-                    <div className={clsx("px-3 py-2 text-xs font-semibold", isGros ? "text-nauma-teal" : "text-gray-700")}>
-                      {(unitPrice * qty).toFixed(2)} MAD
-                    </div>
+                    <Image
+                      src={getCloudinaryUrl(img, 120)}
+                      alt=""
+                      fill
+                      className="object-contain p-1"
+                      sizes="64px"
+                    />
                   </button>
-                );
-              })}
-            </div>
-            <p className="text-xs text-gray-400">
-              👆 Clique sur une ligne pour sélectionner — Prix gros à partir de {seuilGros} {produit.unite}s
-            </p>
+                ))}
+              </div>
+            )}
           </div>
 
-          {/* Quantité manuelle */}
-          <div>
-            <p className="text-xs text-gray-500 mb-2 font-medium uppercase tracking-wide">Quantité</p>
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => setQuantite(Math.max(1, quantite - 1))}
-                className="w-9 h-9 rounded-lg border border-gray-200 flex items-center justify-center text-gray-600 hover:border-nauma-teal transition-colors"
-              >−</button>
-              <span className="w-12 text-center font-semibold">{quantite}</span>
-              <button
-                onClick={() => setQuantite(quantite + 1)}
-                className="w-9 h-9 rounded-lg border border-gray-200 flex items-center justify-center text-gray-600 hover:border-nauma-teal transition-colors"
-              >+</button>
-              <span className="text-sm text-gray-400">{produit.unite}(s)</span>
-            </div>
-          </div>
+          {/* ── Infos produit ─────────────────────────────── */}
+          <div className="flex flex-col gap-6">
 
-          {/* Total + CTA */}
-          <div className="border-t border-gray-100 pt-4">
-            <div className="flex items-center justify-between mb-4">
-              <span className="text-gray-600 font-medium">Total estimé</span>
-              <span className="text-xl font-bold text-nauma-600">{total.toFixed(2)} MAD</span>
-            </div>
-            <div className="flex flex-col gap-2">
+            {/* Titre */}
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-800 leading-snug">
+              {produit.nom}
+            </h1>
+
+            {/* Description */}
+            {produit.description && (
+              <p className="text-gray-500 text-sm leading-relaxed border-t border-gray-100 pt-5">
+                {produit.description}
+              </p>
+            )}
+
+            {/* ── Sélecteur de variantes / types ─── */}
+            {hasVariantes && (
+              <div className="space-y-3 border-t border-gray-100 pt-5">
+                <p className="text-xs font-bold text-gray-600 uppercase tracking-widest">
+                  {produit.variantesLabel || "Type"}
+                  {activeVar && (
+                    <span className="font-normal text-gray-800 ml-1.5 normal-case tracking-normal">
+                      : {activeVar.nom}
+                    </span>
+                  )}
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {produit.variantes!.map((v) => {
+                    const isSelected = activeVar?.nom === v.nom;
+                    return (
+                      <button
+                        key={v.nom}
+                        type="button"
+                        onClick={() => { setVariante(v); setQuantite(1); }}
+                        className={clsx(
+                          "px-4 py-2 border text-sm font-medium transition-all rounded-full",
+                          isSelected
+                            ? "border-nauma-600 bg-nauma-600 text-white"
+                            : "border-gray-300 bg-white text-gray-600 hover:border-nauma-600 hover:text-nauma-600"
+                        )}
+                      >
+                        {v.nom}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* ── Quantité + Bouton ─── */}
+            <div className="flex items-center gap-4 border-t border-gray-100 pt-5">
+              {/* Selector quantité */}
+              <div className="flex items-center border border-gray-200 rounded-full overflow-hidden">
+                <button
+                  onClick={() => setQuantite(Math.max(1, quantite - 1))}
+                  className="w-10 h-10 flex items-center justify-center text-gray-500 hover:bg-gray-50 transition-colors"
+                >
+                  <Minus className="w-3.5 h-3.5" />
+                </button>
+                <span className="w-10 text-center text-sm font-semibold text-gray-800">{quantite}</span>
+                <button
+                  onClick={() => setQuantite(quantite + 1)}
+                  className="w-10 h-10 flex items-center justify-center text-gray-500 hover:bg-gray-50 transition-colors"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                </button>
+              </div>
+
+              {/* CTA principal */}
               <a
                 href={whatsappUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white font-medium py-3 rounded-xl transition-colors"
+                className="flex-1 flex items-center justify-center gap-2 bg-nauma-600 hover:bg-nauma-700 text-white font-bold py-3 px-6 rounded-full uppercase tracking-wider text-sm transition-colors"
               >
-                <MessageCircle className="w-5 h-5" />
-                Commander via WhatsApp
+                AJOUTER AU DEVIS
               </a>
-              <Link
-                href="/devis"
-                className="flex items-center justify-center gap-2 border-2 border-nauma-600 text-nauma-600 hover:bg-nauma-600 hover:text-white font-medium py-3 rounded-xl transition-all text-sm"
-              >
-                <Package className="w-4 h-4" />
-                {mode === "gros" ? "Demander un devis formel" : "Commander en gros"}
-              </Link>
             </div>
+
+            {/* WhatsApp secondaire */}
+            <a
+              href={whatsappUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 text-green-600 hover:text-green-700 text-sm font-medium transition-colors w-fit"
+            >
+              <MessageCircle className="w-4 h-4" />
+              Commander directement par WhatsApp
+            </a>
+
+            {/* ── Métadonnées ─── */}
+            <div className="border-t border-gray-100 pt-5 space-y-2 text-sm text-gray-500">
+              {produit.id && (
+                <p><span className="font-medium text-gray-700">UGS :</span> {produit.id.toUpperCase().slice(0, 8)}</p>
+              )}
+              <p>
+                <span className="font-medium text-gray-700">Catégorie :</span>{" "}
+                <Link href={`/catalogue?cat=${produit.categorie}`} className="text-nauma-600 hover:underline">
+                  {catLabel}
+                </Link>
+              </p>
+              {produit.poids && (
+                <p><span className="font-medium text-gray-700">Poids :</span> {produit.poids}</p>
+              )}
+              {(produit.colis ?? 0) > 0 && (
+                <p><span className="font-medium text-gray-700">Conditionnement :</span> {produit.colis} unités / colis</p>
+              )}
+              {produit.unite && (
+                <p><span className="font-medium text-gray-700">Unité :</span> {produit.unite}</p>
+              )}
+            </div>
+
           </div>
         </div>
       </div>
-    </div>
 
-    {/* Sticky Commander — mobile uniquement */}
-    <div className="fixed bottom-0 left-0 right-0 md:hidden bg-white/95 backdrop-blur-sm border-t border-gray-200 px-4 py-3 z-40 shadow-[0_-4px_24px_rgba(0,0,0,0.10)]">
-      <div className="flex items-center gap-3 max-w-lg mx-auto">
-        <div className="flex-shrink-0">
-          <p className="text-[10px] text-gray-400 leading-tight uppercase tracking-wide">Total estimé</p>
-          <p className="font-bold text-nauma-600 text-base leading-tight">{total.toFixed(2)} MAD</p>
+      {/* ─── Sticky bar mobile ──────────────────────────── */}
+      <div className="fixed bottom-0 left-0 right-0 md:hidden bg-white border-t border-gray-100 px-4 py-3 z-40 shadow-[0_-4px_24px_rgba(0,0,0,0.08)]">
+        <div className="flex items-center gap-3 max-w-lg mx-auto">
+          <div className="flex items-center border border-gray-200 rounded-full overflow-hidden flex-shrink-0">
+            <button
+              onClick={() => setQuantite(Math.max(1, quantite - 1))}
+              className="w-9 h-9 flex items-center justify-center text-gray-500"
+            >
+              <Minus className="w-3 h-3" />
+            </button>
+            <span className="w-8 text-center text-sm font-semibold">{quantite}</span>
+            <button
+              onClick={() => setQuantite(quantite + 1)}
+              className="w-9 h-9 flex items-center justify-center text-gray-500"
+            >
+              <Plus className="w-3 h-3" />
+            </button>
+          </div>
+          <a
+            href={whatsappUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex-1 bg-nauma-600 text-white text-center py-3 rounded-full font-bold text-sm uppercase tracking-wider"
+          >
+            AJOUTER AU DEVIS
+          </a>
         </div>
-        <a
-          href={whatsappUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex-1 bg-green-500 active:bg-green-600 text-white text-center py-3 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 transition-colors"
-        >
-          <MessageCircle className="w-4 h-4" />
-          Commander
-        </a>
       </div>
-    </div>
     </>
   );
 }
