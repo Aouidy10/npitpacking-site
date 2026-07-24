@@ -11,6 +11,7 @@ export interface Variante {
   prixDetail: number;
   prixGros: number;
   seuilGros: number;
+  image?: string;
 }
 
 export interface Produit {

@@ -57,9 +57,14 @@ export default function ProduitDetail({ slug }: { slug: string }) {
   const catLabel      = catConfig?.label ?? produit.categorie;
 
   const images = produit.images.length > 0 ? produit.images : [];
-  const currentImg = images[imgIdx]
-    ? getCloudinaryUrl(images[imgIdx], 800)
-    : "/placeholder-product.svg";
+
+  /* Image affichée : si variante active a une image propre, on l'utilise */
+  const varianteImg = activeVar?.image ?? "";
+  const currentImg = varianteImg
+    ? getCloudinaryUrl(varianteImg, 800)
+    : images[imgIdx]
+      ? getCloudinaryUrl(images[imgIdx], 800)
+      : "/placeholder-product.svg";
 
   const whatsappMsg = `Bonjour, je voudrais commander :\n- Produit : ${produit.nom}${activeVar ? `\n- Type : ${activeVar.nom}` : ""}\n- Quantité : ${quantite} ${produit.unite}(s)`;
   const whatsappUrl = `https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "212600000000"}?text=${encodeURIComponent(whatsappMsg)}`;
@@ -206,7 +211,7 @@ export default function ProduitDetail({ slug }: { slug: string }) {
                       <button
                         key={v.nom}
                         type="button"
-                        onClick={() => { setVariante(v); setQuantite(1); }}
+                        onClick={() => { setVariante(v); setQuantite(1); setImgIdx(0); }}
                         className={clsx(
                           "px-4 py-2 border text-sm font-medium transition-all rounded-full",
                           isSelected

@@ -36,7 +36,7 @@ const EMPTY_FORM: FormData = {
   variantesLabel: "",
 };
 
-const EMPTY_VARIANTE: Variante = { nom: "", prixDetail: 0, prixGros: 0, seuilGros: 10 };
+const EMPTY_VARIANTE: Variante = { nom: "", prixDetail: 0, prixGros: 0, seuilGros: 10, image: "" };
 
 const UNITES = ["rouleau", "paquet", "unité", "colis", "boîte", "lot", "kg"];
 
@@ -116,6 +116,7 @@ function ProduitsAdmin() {
           prixDetail: Number(v.prixDetail),
           prixGros: Number(v.prixGros),
           seuilGros: Number(v.seuilGros),
+          image: v.image || "",
         })),
         variantesLabel: form.variantesLabel || "",
       };
@@ -518,76 +519,130 @@ function ProduitsAdmin() {
 
                     {/* Liste des types */}
                     <div>
-                      <div className="grid grid-cols-12 gap-2 text-[10px] font-bold text-gray-400 uppercase tracking-wide mb-1 px-1">
-                        <div className="col-span-4">Nom / Valeur *</div>
-                        <div className="col-span-3">Prix détail</div>
-                        <div className="col-span-3">Prix gros</div>
-                        <div className="col-span-1">Min</div>
-                        <div className="col-span-1" />
-                      </div>
-
-                      <div className="space-y-2">
+                      <div className="space-y-3">
                         {form.variantes!.map((v, i) => (
-                          <div key={i} className="grid grid-cols-12 gap-2 items-center">
-                            <input
-                              value={v.nom}
-                              onChange={(e) => {
-                                const vars = [...form.variantes!];
-                                vars[i] = { ...vars[i], nom: e.target.value };
-                                handleField("variantes", vars);
-                              }}
-                              placeholder="ex: 14oz"
-                              className={clsx(
-                                "col-span-4 border rounded-lg px-2.5 py-2 text-sm focus:outline-none",
-                                v.nom.trim() ? "border-gray-200 focus:border-nauma-600" : "border-red-300 focus:border-red-400"
-                              )}
-                            />
-                            <input
-                              type="number"
-                              value={v.prixDetail || ""}
-                              onChange={(e) => {
-                                const vars = [...form.variantes!];
-                                vars[i] = { ...vars[i], prixDetail: Number(e.target.value) };
-                                handleField("variantes", vars);
-                              }}
-                              placeholder="0.00"
-                              min="0" step="0.5"
-                              className="col-span-3 border border-gray-200 rounded-lg px-2.5 py-2 text-sm focus:outline-none focus:border-nauma-600"
-                            />
-                            <input
-                              type="number"
-                              value={v.prixGros || ""}
-                              onChange={(e) => {
-                                const vars = [...form.variantes!];
-                                vars[i] = { ...vars[i], prixGros: Number(e.target.value) };
-                                handleField("variantes", vars);
-                              }}
-                              placeholder="0.00"
-                              min="0" step="0.5"
-                              className="col-span-3 border border-gray-200 rounded-lg px-2.5 py-2 text-sm focus:outline-none focus:border-nauma-600"
-                            />
-                            <input
-                              type="number"
-                              value={v.seuilGros || ""}
-                              onChange={(e) => {
-                                const vars = [...form.variantes!];
-                                vars[i] = { ...vars[i], seuilGros: Number(e.target.value) };
-                                handleField("variantes", vars);
-                              }}
-                              placeholder="10"
-                              min="1"
-                              className="col-span-1 border border-gray-200 rounded-lg px-2 py-2 text-sm focus:outline-none focus:border-nauma-600 text-center"
-                            />
-                            <button
-                              type="button"
-                              onClick={() => {
-                                const vars = form.variantes!.filter((_, idx) => idx !== i);
-                                handleField("variantes", vars.length ? vars : []);
-                              }}
-                              className="col-span-1 flex items-center justify-center text-red-300 hover:text-red-500 transition-colors"
-                            >
-                              <X className="w-4 h-4" />
-                            </button>
+                          <div key={i} className="border border-gray-100 rounded-xl p-3 space-y-2 bg-gray-50">
+                            {/* Ligne 1 : image + nom */}
+                            <div className="flex items-center gap-3">
+                              {/* Miniature image */}
+                              <div className="relative flex-shrink-0">
+                                {v.image ? (
+                                  <div className="relative w-14 h-14 rounded-lg overflow-hidden bg-white border border-gray-200">
+                                    <CldImage src={v.image} alt={v.nom} fill className="object-contain p-1" sizes="56px" />
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        const vars = [...form.variantes!];
+                                        vars[i] = { ...vars[i], image: "" };
+                                        handleField("variantes", vars);
+                                      }}
+                                      className="absolute top-0.5 right-0.5 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center"
+                                    >
+                                      <X className="w-2.5 h-2.5" />
+                                    </button>
+                                  </div>
+                                ) : (
+                                  <CldUploadWidget
+                                    uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "npit_products"}
+                                    options={{ folder: "npit", maxFiles: 1, resourceType: "image" }}
+                                    onSuccess={(result) => {
+                                      if (result.info && typeof result.info === "object" && "public_id" in result.info) {
+                                        const vars = [...form.variantes!];
+                                        vars[i] = { ...vars[i], image: result.info.public_id as string };
+                                        handleField("variantes", vars);
+                                      }
+                                    }}
+                                  >
+                                    {({ open }) => (
+                                      <button
+                                        type="button"
+                                        onClick={() => open()}
+                                        className="w-14 h-14 border-2 border-dashed border-gray-200 rounded-lg hover:border-nauma-600 transition-colors flex flex-col items-center justify-center gap-0.5 text-gray-300 hover:text-nauma-600"
+                                      >
+                                        <ImagePlus className="w-4 h-4" />
+                                        <span className="text-[9px]">Photo</span>
+                                      </button>
+                                    )}
+                                  </CldUploadWidget>
+                                )}
+                              </div>
+
+                              {/* Nom de la variante */}
+                              <input
+                                value={v.nom}
+                                onChange={(e) => {
+                                  const vars = [...form.variantes!];
+                                  vars[i] = { ...vars[i], nom: e.target.value };
+                                  handleField("variantes", vars);
+                                }}
+                                placeholder="ex: 14oz, Petit, 8m…"
+                                className={clsx(
+                                  "flex-1 border rounded-lg px-3 py-2 text-sm focus:outline-none font-medium",
+                                  v.nom.trim() ? "border-gray-200 focus:border-nauma-600" : "border-red-300 focus:border-red-400"
+                                )}
+                              />
+
+                              {/* Supprimer */}
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const vars = form.variantes!.filter((_, idx) => idx !== i);
+                                  handleField("variantes", vars.length ? vars : []);
+                                }}
+                                className="flex-shrink-0 text-red-300 hover:text-red-500 transition-colors p-1"
+                              >
+                                <X className="w-4 h-4" />
+                              </button>
+                            </div>
+
+                            {/* Ligne 2 : prix (optionnel) */}
+                            <div className="grid grid-cols-3 gap-2">
+                              <div>
+                                <label className="block text-[10px] text-gray-400 mb-1">Prix détail</label>
+                                <input
+                                  type="number"
+                                  value={v.prixDetail || ""}
+                                  onChange={(e) => {
+                                    const vars = [...form.variantes!];
+                                    vars[i] = { ...vars[i], prixDetail: Number(e.target.value) };
+                                    handleField("variantes", vars);
+                                  }}
+                                  placeholder="0.00"
+                                  min="0" step="0.5"
+                                  className="w-full border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-nauma-600"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-[10px] text-gray-400 mb-1">Prix gros</label>
+                                <input
+                                  type="number"
+                                  value={v.prixGros || ""}
+                                  onChange={(e) => {
+                                    const vars = [...form.variantes!];
+                                    vars[i] = { ...vars[i], prixGros: Number(e.target.value) };
+                                    handleField("variantes", vars);
+                                  }}
+                                  placeholder="0.00"
+                                  min="0" step="0.5"
+                                  className="w-full border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-nauma-600"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-[10px] text-gray-400 mb-1">Min. gros</label>
+                                <input
+                                  type="number"
+                                  value={v.seuilGros || ""}
+                                  onChange={(e) => {
+                                    const vars = [...form.variantes!];
+                                    vars[i] = { ...vars[i], seuilGros: Number(e.target.value) };
+                                    handleField("variantes", vars);
+                                  }}
+                                  placeholder="10"
+                                  min="1"
+                                  className="w-full border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-nauma-600"
+                                />
+                              </div>
+                            </div>
                           </div>
                         ))}
                       </div>
