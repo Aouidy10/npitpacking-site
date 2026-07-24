@@ -81,8 +81,15 @@ function ProduitsAdmin() {
   const currentSousCats =
     CATEGORIES_CONFIG.find((c) => c.slug === form.categorie)?.sousCats ?? [];
 
+  const hasVars = (form.variantes ?? []).length > 0;
+  const canSave =
+    !!form.nom &&
+    (hasVars
+      ? form.variantes!.every((v) => v.nom.trim())
+      : form.prixDetail > 0 && form.prixGros > 0);
+
   const handleSave = async () => {
-    if (!form.nom || !form.prixDetail || !form.prixGros) return;
+    if (!canSave) return;
     setSaving(true);
     try {
       const hasVariantes = (form.variantes ?? []).length > 0;
@@ -444,46 +451,57 @@ function ProduitsAdmin() {
                 </div>
               </div>
 
-              {/* Variantes / Types */}
-              <div className="bg-blue-50 rounded-2xl p-4 space-y-3">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs font-bold text-blue-700 uppercase tracking-wider">Variantes / Types</p>
-                    <p className="text-xs text-blue-500 mt-0.5">Ex: 8m / 30m — Petit / Moyen / Grand — 100cc / 500cc</p>
+              {/* ── Variantes / Types ──────────────────────────── */}
+              <div className="border-2 border-blue-100 rounded-2xl overflow-hidden">
+                {/* Header toggle */}
+                <button
+                  type="button"
+                  onClick={() => handleField("variantes", hasVars ? [] : [{ ...EMPTY_VARIANTE }])}
+                  className="w-full flex items-center justify-between px-4 py-3 bg-blue-50 hover:bg-blue-100 transition-colors"
+                >
+                  <div className="text-left">
+                    <p className="text-sm font-bold text-blue-700">
+                      Types / Tailles / Variantes
+                      {hasVars && (
+                        <span className="ml-2 bg-blue-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
+                          {form.variantes!.length} type{form.variantes!.length > 1 ? "s" : ""}
+                        </span>
+                      )}
+                    </p>
+                    <p className="text-xs text-blue-400 mt-0.5">
+                      Ex : 12oz · 14oz · 16oz — Petit · Moyen · Grand — 8m · 30m
+                    </p>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => handleField("variantes", (form.variantes ?? []).length > 0 ? [] : [{ ...EMPTY_VARIANTE }])}
-                    className={clsx(
-                      "w-10 h-5 rounded-full transition-colors relative flex-shrink-0",
-                      (form.variantes ?? []).length > 0 ? "bg-blue-500" : "bg-gray-200"
-                    )}
-                  >
+                  <div className={clsx(
+                    "w-10 h-5 rounded-full transition-colors relative flex-shrink-0",
+                    hasVars ? "bg-blue-500" : "bg-gray-200"
+                  )}>
                     <div className={clsx(
                       "absolute w-4 h-4 bg-white rounded-full top-0.5 transition-all shadow",
-                      (form.variantes ?? []).length > 0 ? "left-5" : "left-0.5"
+                      hasVars ? "left-5" : "left-0.5"
                     )} />
-                  </button>
-                </div>
+                  </div>
+                </button>
 
-                {(form.variantes ?? []).length > 0 && (
-                  <div className="space-y-3">
-                    {/* Label des variantes */}
+                {hasVars && (
+                  <div className="p-4 space-y-4 bg-white">
+
+                    {/* Label affiché au client */}
                     <div>
-                      <label className="block text-xs font-medium text-blue-700 mb-1">
-                        Label du filtre (affiché au client)
+                      <label className="block text-xs font-bold text-gray-600 uppercase tracking-wide mb-2">
+                        Libellé affiché (ex : TAILLE, LONGUEUR, CAPACITÉ)
                       </label>
                       <div className="flex gap-2 flex-wrap mb-2">
-                        {["Longueur", "Taille", "Capacité", "Format", "Poids", "Volume"].map((preset) => (
+                        {["Taille", "Longueur", "Capacité", "Format", "Poids", "Volume", "Épaisseur"].map((preset) => (
                           <button
                             key={preset}
                             type="button"
                             onClick={() => handleField("variantesLabel", preset)}
                             className={clsx(
-                              "px-2.5 py-1 rounded-full text-xs font-medium border transition-all",
+                              "px-3 py-1 rounded-full text-xs font-semibold border transition-all",
                               form.variantesLabel === preset
-                                ? "bg-blue-500 text-white border-blue-500"
-                                : "bg-white text-blue-600 border-blue-200 hover:border-blue-400"
+                                ? "bg-nauma-600 text-white border-nauma-600"
+                                : "bg-white text-gray-500 border-gray-200 hover:border-nauma-600 hover:text-nauma-600"
                             )}
                           >
                             {preset}
@@ -493,88 +511,102 @@ function ProduitsAdmin() {
                       <input
                         value={form.variantesLabel ?? ""}
                         onChange={(e) => handleField("variantesLabel", e.target.value)}
-                        placeholder="ou tape un label personnalisé..."
-                        className="w-full border border-blue-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-blue-400 bg-white"
+                        placeholder="Ou tape un libellé personnalisé…"
+                        className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-nauma-600"
                       />
                     </div>
-                    {/* En-tête tableau */}
-                    <div className="grid grid-cols-12 gap-1 text-xs font-medium text-blue-600 px-1">
-                      <div className="col-span-3">Nom/Taille</div>
-                      <div className="col-span-3">Prix détail</div>
-                      <div className="col-span-3">Prix gros</div>
-                      <div className="col-span-2">Min. gros</div>
-                      <div className="col-span-1" />
-                    </div>
-                    {(form.variantes ?? []).map((v, i) => (
-                      <div key={i} className="grid grid-cols-12 gap-1 items-center">
-                        <input
-                          value={v.nom}
-                          onChange={(e) => {
-                            const vars = [...(form.variantes ?? [])];
-                            vars[i] = { ...vars[i], nom: e.target.value };
-                            handleField("variantes", vars);
-                          }}
-                          placeholder="ex: 8m, 100cc"
-                          className="col-span-3 border border-blue-200 rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:border-blue-400 bg-white"
-                        />
-                        <input
-                          type="number"
-                          value={v.prixDetail || ""}
-                          onChange={(e) => {
-                            const vars = [...(form.variantes ?? [])];
-                            vars[i] = { ...vars[i], prixDetail: Number(e.target.value) };
-                            handleField("variantes", vars);
-                          }}
-                          placeholder="0"
-                          min="0"
-                          step="0.5"
-                          className="col-span-3 border border-blue-200 rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:border-blue-400 bg-white"
-                        />
-                        <input
-                          type="number"
-                          value={v.prixGros || ""}
-                          onChange={(e) => {
-                            const vars = [...(form.variantes ?? [])];
-                            vars[i] = { ...vars[i], prixGros: Number(e.target.value) };
-                            handleField("variantes", vars);
-                          }}
-                          placeholder="0"
-                          min="0"
-                          step="0.5"
-                          className="col-span-3 border border-blue-200 rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:border-blue-400 bg-white"
-                        />
-                        <input
-                          type="number"
-                          value={v.seuilGros || ""}
-                          onChange={(e) => {
-                            const vars = [...(form.variantes ?? [])];
-                            vars[i] = { ...vars[i], seuilGros: Number(e.target.value) };
-                            handleField("variantes", vars);
-                          }}
-                          placeholder="10"
-                          min="1"
-                          className="col-span-2 border border-blue-200 rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:border-blue-400 bg-white"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => {
-                            const vars = (form.variantes ?? []).filter((_, idx) => idx !== i);
-                            handleField("variantes", vars);
-                          }}
-                          className="col-span-1 flex items-center justify-center text-red-400 hover:text-red-600"
-                        >
-                          <X className="w-3.5 h-3.5" />
-                        </button>
+
+                    {/* Liste des types */}
+                    <div>
+                      <div className="grid grid-cols-12 gap-2 text-[10px] font-bold text-gray-400 uppercase tracking-wide mb-1 px-1">
+                        <div className="col-span-4">Nom / Valeur *</div>
+                        <div className="col-span-3">Prix détail</div>
+                        <div className="col-span-3">Prix gros</div>
+                        <div className="col-span-1">Min</div>
+                        <div className="col-span-1" />
                       </div>
-                    ))}
-                    <button
-                      type="button"
-                      onClick={() => handleField("variantes", [...(form.variantes ?? []), { ...EMPTY_VARIANTE }])}
-                      className="w-full border-2 border-dashed border-blue-200 text-blue-500 hover:border-blue-400 hover:bg-blue-50 text-xs font-medium py-2 rounded-xl transition-colors flex items-center justify-center gap-1"
-                    >
-                      <Plus className="w-3.5 h-3.5" />
-                      Ajouter une variante
-                    </button>
+
+                      <div className="space-y-2">
+                        {form.variantes!.map((v, i) => (
+                          <div key={i} className="grid grid-cols-12 gap-2 items-center">
+                            <input
+                              value={v.nom}
+                              onChange={(e) => {
+                                const vars = [...form.variantes!];
+                                vars[i] = { ...vars[i], nom: e.target.value };
+                                handleField("variantes", vars);
+                              }}
+                              placeholder="ex: 14oz"
+                              className={clsx(
+                                "col-span-4 border rounded-lg px-2.5 py-2 text-sm focus:outline-none",
+                                v.nom.trim() ? "border-gray-200 focus:border-nauma-600" : "border-red-300 focus:border-red-400"
+                              )}
+                            />
+                            <input
+                              type="number"
+                              value={v.prixDetail || ""}
+                              onChange={(e) => {
+                                const vars = [...form.variantes!];
+                                vars[i] = { ...vars[i], prixDetail: Number(e.target.value) };
+                                handleField("variantes", vars);
+                              }}
+                              placeholder="0.00"
+                              min="0" step="0.5"
+                              className="col-span-3 border border-gray-200 rounded-lg px-2.5 py-2 text-sm focus:outline-none focus:border-nauma-600"
+                            />
+                            <input
+                              type="number"
+                              value={v.prixGros || ""}
+                              onChange={(e) => {
+                                const vars = [...form.variantes!];
+                                vars[i] = { ...vars[i], prixGros: Number(e.target.value) };
+                                handleField("variantes", vars);
+                              }}
+                              placeholder="0.00"
+                              min="0" step="0.5"
+                              className="col-span-3 border border-gray-200 rounded-lg px-2.5 py-2 text-sm focus:outline-none focus:border-nauma-600"
+                            />
+                            <input
+                              type="number"
+                              value={v.seuilGros || ""}
+                              onChange={(e) => {
+                                const vars = [...form.variantes!];
+                                vars[i] = { ...vars[i], seuilGros: Number(e.target.value) };
+                                handleField("variantes", vars);
+                              }}
+                              placeholder="10"
+                              min="1"
+                              className="col-span-1 border border-gray-200 rounded-lg px-2 py-2 text-sm focus:outline-none focus:border-nauma-600 text-center"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const vars = form.variantes!.filter((_, idx) => idx !== i);
+                                handleField("variantes", vars.length ? vars : []);
+                              }}
+                              className="col-span-1 flex items-center justify-center text-red-300 hover:text-red-500 transition-colors"
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Bouton ajouter */}
+                      <button
+                        type="button"
+                        onClick={() => handleField("variantes", [...form.variantes!, { ...EMPTY_VARIANTE }])}
+                        className="mt-3 w-full border-2 border-dashed border-gray-200 hover:border-nauma-600 hover:bg-blue-50 text-gray-400 hover:text-nauma-600 text-xs font-semibold py-2.5 rounded-xl transition-all flex items-center justify-center gap-1.5"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                        Ajouter un type
+                      </button>
+                    </div>
+
+                    {/* Note prix globaux */}
+                    <p className="text-xs text-gray-400 bg-gray-50 px-3 py-2 rounded-lg">
+                      💡 Les champs <strong>Prix détail / gros</strong> sont facultatifs par type — ils servent pour le devis WhatsApp. Sinon les prix globaux s&apos;appliquent.
+                    </p>
                   </div>
                 )}
               </div>
@@ -608,7 +640,7 @@ function ProduitsAdmin() {
               </button>
               <button
                 onClick={handleSave}
-                disabled={saving || !form.nom || !form.prixDetail || !form.prixGros}
+                disabled={saving || !canSave}
                 className="btn-primary flex items-center gap-2 text-sm py-2.5 disabled:opacity-50"
               >
                 <Save className="w-4 h-4" />
