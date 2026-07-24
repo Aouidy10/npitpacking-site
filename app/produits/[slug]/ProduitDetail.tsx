@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ChevronRight, ChevronLeft, Minus, Plus, Package, MessageCircle } from "lucide-react";
+import { ChevronRight, ChevronLeft, Minus, Plus, Package, MessageCircle, X, ZoomIn } from "lucide-react";
 import { Produit, Variante } from "@/types";
 import { getCloudinaryUrl } from "@/lib/cloudinary";
 import { PRODUITS_DEMO } from "@/lib/produits";
@@ -16,10 +16,12 @@ export default function ProduitDetail({ slug }: { slug: string }) {
   const [produit, setProduit] = useState<Produit | null>(
     PRODUITS_DEMO.find((p) => p.slug === slug) ?? null
   );
-  const [loading, setLoading]   = useState(!produit);
-  const [imgIdx, setImgIdx]     = useState(0);
-  const [variante, setVariante] = useState<Variante | null>(null);
-  const [quantite, setQuantite] = useState(1);
+  const [loading, setLoading]     = useState(!produit);
+  const [imgIdx, setImgIdx]       = useState(0);
+  const [variante, setVariante]   = useState<Variante | null>(null);
+  const [quantite, setQuantite]   = useState(1);
+  const [lightbox, setLightbox]   = useState(false);
+  const [lightboxIdx, setLightboxIdx] = useState(0);
 
   useEffect(() => {
     if (produit) return;
@@ -35,6 +37,19 @@ export default function ProduitDetail({ slug }: { slug: string }) {
       }
     })();
   }, [slug, produit]);
+
+  /* Clavier pour le lightbox */
+  useEffect(() => {
+    if (!lightbox) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setLightbox(false);
+      if (e.key === "ArrowRight") setLightboxIdx((i) => (i + 1) % gallery.length);
+      if (e.key === "ArrowLeft")  setLightboxIdx((i) => (i - 1 + gallery.length) % gallery.length);
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lightbox]);
 
   if (loading) {
     return <div className="container-main py-24 text-center text-gray-400">Chargement…</div>;
@@ -137,9 +152,12 @@ export default function ProduitDetail({ slug }: { slug: string }) {
 
           {/* ── Galerie image ─────────────────────────────── */}
           <div>
-            {/* Image principale */}
-            <div className="relative bg-gray-50 border border-gray-100 overflow-hidden"
-              style={{ paddingBottom: "100%" }}>
+            {/* Image principale — cliquable pour ouvrir le lightbox */}
+            <div
+              className="relative bg-gray-50 border border-gray-100 overflow-hidden cursor-zoom-in"
+              style={{ paddingBottom: "100%" }}
+              onClick={() => { setLightboxIdx(safeIdx); setLightbox(true); }}
+            >
               <Image
                 src={currentImg}
                 alt={produit.nom}
@@ -148,6 +166,11 @@ export default function ProduitDetail({ slug }: { slug: string }) {
                 sizes="(max-width: 768px) 100vw, 50vw"
                 priority
               />
+
+              {/* Icône zoom */}
+              <div className="absolute bottom-3 right-3 bg-white/80 p-1.5 rounded-full shadow-sm pointer-events-none">
+                <ZoomIn className="w-4 h-4 text-gray-500" />
+              </div>
 
               {/* Badge */}
               {produit.badge && (
@@ -344,6 +367,80 @@ export default function ProduitDetail({ slug }: { slug: string }) {
           </div>
         </div>
       </div>
+
+      {/* ─── Lightbox plein écran ───────────────────────── */}
+      {lightbox && (
+        <div
+          className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center"
+          onClick={() => setLightbox(false)}
+        >
+          {/* Image */}
+          <div
+            className="relative w-full h-full max-w-4xl max-h-[90vh] m-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {gallery[lightboxIdx]?.src && (
+              <Image
+                src={getCloudinaryUrl(gallery[lightboxIdx].src, 1200)}
+                alt=""
+                fill
+                className="object-contain"
+                sizes="100vw"
+                priority
+              />
+            )}
+          </div>
+
+          {/* Fermer */}
+          <button
+            onClick={() => setLightbox(false)}
+            className="absolute top-4 right-4 bg-white/10 hover:bg-white/20 text-white w-10 h-10 rounded-full flex items-center justify-center transition-colors z-10"
+          >
+            <X className="w-5 h-5" />
+          </button>
+
+          {/* Flèche gauche */}
+          {gallery.length > 1 && (
+            <button
+              onClick={(e) => { e.stopPropagation(); setLightboxIdx((i) => (i - 1 + gallery.length) % gallery.length); }}
+              className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/10 hover:bg-white/25 text-white w-12 h-12 rounded-full flex items-center justify-center transition-colors z-10"
+            >
+              <ChevronLeft className="w-6 h-6" />
+            </button>
+          )}
+
+          {/* Flèche droite */}
+          {gallery.length > 1 && (
+            <button
+              onClick={(e) => { e.stopPropagation(); setLightboxIdx((i) => (i + 1) % gallery.length); }}
+              className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/10 hover:bg-white/25 text-white w-12 h-12 rounded-full flex items-center justify-center transition-colors z-10"
+            >
+              <ChevronRight className="w-6 h-6" />
+            </button>
+          )}
+
+          {/* Indicateur position */}
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
+            {gallery.map((_, i) => (
+              <button
+                key={i}
+                onClick={(e) => { e.stopPropagation(); setLightboxIdx(i); }}
+                className={clsx(
+                  "h-1.5 rounded-full transition-all",
+                  i === lightboxIdx ? "bg-white w-5" : "bg-white/40 w-1.5"
+                )}
+              />
+            ))}
+          </div>
+
+          {/* Nom variante si c'est une image de type */}
+          {gallery[lightboxIdx]?.varianteIdx !== undefined && (
+            <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-white/10 text-white text-xs font-bold px-4 py-1.5 rounded-full z-10">
+              {produit.variantes![gallery[lightboxIdx].varianteIdx!].nom}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* ─── Sticky bar mobile ──────────────────────────── */}
       <div className="fixed bottom-0 left-0 right-0 md:hidden bg-white border-t border-gray-100 px-4 py-3 z-40 shadow-[0_-4px_24px_rgba(0,0,0,0.08)]">
