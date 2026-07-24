@@ -51,26 +51,55 @@ export default function ProduitDetail({ slug }: { slug: string }) {
     );
   }
 
-  const hasVariantes  = (produit.variantes ?? []).length > 0;
-  const activeVar     = variante ?? (hasVariantes ? produit.variantes![0] : null);
-  const catConfig     = CATEGORIES_CONFIG.find((c) => c.slug === produit.categorie);
-  const catLabel      = catConfig?.label ?? produit.categorie;
+  const hasVariantes = (produit.variantes ?? []).length > 0;
+  const activeVar    = variante ?? (hasVariantes ? produit.variantes![0] : null);
+  const catConfig    = CATEGORIES_CONFIG.find((c) => c.slug === produit.categorie);
+  const catLabel     = catConfig?.label ?? produit.categorie;
 
-  const images = produit.images.length > 0 ? produit.images : [];
+  /* ── Galerie combinée : images de base + images des variantes ── */
+  type GalleryEntry = { src: string; varianteIdx?: number };
+  const gallery: GalleryEntry[] = [
+    ...produit.images.filter(Boolean).map((src) => ({ src })),
+    ...(produit.variantes ?? [])
+      .map((v, vi) => v.image ? { src: v.image, varianteIdx: vi } : null)
+      .filter((x): x is GalleryEntry => x !== null),
+  ];
+  if (gallery.length === 0) gallery.push({ src: "" });
 
-  /* Image affichée : si variante active a une image propre, on l'utilise */
-  const varianteImg = activeVar?.image ?? "";
-  const currentImg = varianteImg
-    ? getCloudinaryUrl(varianteImg, 800)
-    : images[imgIdx]
-      ? getCloudinaryUrl(images[imgIdx], 800)
-      : "/placeholder-product.svg";
+  /* Index courant dans la galerie (synchronisé avec variant sélectionné) */
+  const activeSrc = activeVar?.image || "";
+  const galleryIdx = activeSrc
+    ? gallery.findIndex((g) => g.src === activeSrc)
+    : imgIdx;
+  const safeIdx = galleryIdx >= 0 ? galleryIdx : imgIdx;
+  const currentSrc = gallery[safeIdx]?.src;
+  const currentImg = currentSrc
+    ? getCloudinaryUrl(currentSrc, 800)
+    : "/placeholder-product.svg";
+
+  const prevImg = () => {
+    const next = (safeIdx - 1 + gallery.length) % gallery.length;
+    const entry = gallery[next];
+    if (entry.varianteIdx !== undefined) {
+      setVariante(produit.variantes![entry.varianteIdx]);
+    } else {
+      setVariante(null);
+      setImgIdx(next);
+    }
+  };
+  const nextImg = () => {
+    const next = (safeIdx + 1) % gallery.length;
+    const entry = gallery[next];
+    if (entry.varianteIdx !== undefined) {
+      setVariante(produit.variantes![entry.varianteIdx]);
+    } else {
+      setVariante(null);
+      setImgIdx(next);
+    }
+  };
 
   const whatsappMsg = `Bonjour, je voudrais commander :\n- Produit : ${produit.nom}${activeVar ? `\n- Type : ${activeVar.nom}` : ""}\n- Quantité : ${quantite} ${produit.unite}(s)`;
   const whatsappUrl = `https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "212600000000"}?text=${encodeURIComponent(whatsappMsg)}`;
-
-  const prevImg = () => setImgIdx((i) => (i - 1 + images.length) % images.length);
-  const nextImg = () => setImgIdx((i) => (i + 1) % images.length);
 
   return (
     <>
@@ -135,7 +164,7 @@ export default function ProduitDetail({ slug }: { slug: string }) {
               )}
 
               {/* Flèches navigation */}
-              {images.length > 1 && (
+              {gallery.length > 1 && (
                 <>
                   <button
                     onClick={prevImg}
@@ -153,27 +182,49 @@ export default function ProduitDetail({ slug }: { slug: string }) {
               )}
             </div>
 
-            {/* Miniatures */}
-            {images.length > 1 && (
-              <div className="flex gap-2 mt-3 overflow-x-auto">
-                {images.map((img, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setImgIdx(i)}
-                    className={clsx(
-                      "relative flex-shrink-0 w-16 h-16 border-2 overflow-hidden bg-gray-50 transition-all",
-                      imgIdx === i ? "border-nauma-600" : "border-gray-200 hover:border-gray-400"
-                    )}
-                  >
-                    <Image
-                      src={getCloudinaryUrl(img, 120)}
-                      alt=""
-                      fill
-                      className="object-contain p-1"
-                      sizes="64px"
-                    />
-                  </button>
-                ))}
+            {/* Miniatures — images de base + images des variantes */}
+            {gallery.length > 1 && (
+              <div className="flex gap-2 mt-3 overflow-x-auto pb-1">
+                {gallery.map((entry, i) => {
+                  const isActive = i === safeIdx;
+                  const thumbSrc = entry.src ? getCloudinaryUrl(entry.src, 120) : "/placeholder-product.svg";
+                  /* Nom du type si c'est une variante */
+                  const varLabel = entry.varianteIdx !== undefined
+                    ? produit.variantes![entry.varianteIdx].nom
+                    : null;
+                  return (
+                    <button
+                      key={i}
+                      onClick={() => {
+                        if (entry.varianteIdx !== undefined) {
+                          setVariante(produit.variantes![entry.varianteIdx]);
+                        } else {
+                          setVariante(null);
+                          setImgIdx(i);
+                        }
+                      }}
+                      className={clsx(
+                        "relative flex-shrink-0 w-16 h-16 border-2 overflow-hidden bg-gray-50 transition-all",
+                        isActive ? "border-nauma-600" : "border-gray-200 hover:border-gray-400"
+                      )}
+                      title={varLabel ?? undefined}
+                    >
+                      <Image
+                        src={thumbSrc}
+                        alt={varLabel ?? ""}
+                        fill
+                        className="object-contain p-1"
+                        sizes="64px"
+                      />
+                      {/* Badge type sur la miniature variante */}
+                      {varLabel && (
+                        <span className="absolute bottom-0 left-0 right-0 text-[8px] font-bold text-center bg-nauma-600/80 text-white py-0.5 truncate px-1">
+                          {varLabel}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
               </div>
             )}
           </div>
@@ -211,7 +262,7 @@ export default function ProduitDetail({ slug }: { slug: string }) {
                       <button
                         key={v.nom}
                         type="button"
-                        onClick={() => { setVariante(v); setQuantite(1); setImgIdx(0); }}
+                        onClick={() => { setVariante(v); setQuantite(1); }}
                         className={clsx(
                           "px-4 py-2 border text-sm font-medium transition-all rounded-full",
                           isSelected
