@@ -12,21 +12,25 @@ export default function ProductCard({ produit }: { produit: Produit }) {
   const hasVariants = (produit.variantes ?? []).length > 0;
 
   return (
-    <div className="bg-white border border-gray-100 group flex flex-col hover:shadow-lg transition-shadow duration-300">
-      {/* Image — ratio portrait 4:5 comme proxymarket */}
-      <Link href={`/produits/${produit.slug}`} className="block relative overflow-hidden bg-gray-50" style={{ paddingBottom: "125%" }}>
+    <div className="bg-white border border-gray-100 group flex flex-col hover:shadow-md transition-shadow duration-300">
+      {/* Image — carré 1:1 */}
+      <Link
+        href={`/produits/${produit.slug}`}
+        className="block relative overflow-hidden bg-gray-50"
+        style={{ paddingBottom: "100%" }}
+      >
         <Image
           src={imageUrl}
           alt={produit.nom}
           fill
-          className="object-cover group-hover:scale-105 transition-transform duration-500"
+          className="object-contain p-3 group-hover:scale-105 transition-transform duration-500"
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
         />
 
         {/* Badge */}
         {produit.badge && (
           <span className={clsx(
-            "absolute top-0 left-0 text-white text-[10px] font-extrabold px-2.5 py-1 uppercase tracking-widest",
+            "absolute top-2 left-2 text-white text-[10px] font-extrabold px-2 py-0.5 uppercase tracking-widest",
             produit.badge === "nouveau"    && "bg-nauma-teal",
             produit.badge === "promo"      && "bg-red-500",
             produit.badge === "bestseller" && "bg-nauma-gold",
@@ -46,27 +50,18 @@ export default function ProductCard({ produit }: { produit: Produit }) {
       </Link>
 
       {/* Infos */}
-      <div className="p-3 flex flex-col flex-1">
-        <Link href={`/produits/${produit.slug}`} className="flex-1">
-          <h3 className="text-sm font-medium text-gray-800 leading-snug hover:text-nauma-600 transition-colors line-clamp-2 text-center mb-1">
+      <div className="p-3 flex flex-col flex-1 items-center text-center">
+        <Link href={`/produits/${produit.slug}`} className="flex-1 w-full mb-3">
+          <h3 className="text-sm text-gray-700 leading-snug hover:text-nauma-600 transition-colors line-clamp-3">
             {produit.nom}
           </h3>
         </Link>
 
-        {/* Prix */}
-        {produit.prixDetail > 0 && (
-          <p className="text-center text-xs text-gray-400 mb-3">
-            À partir de{" "}
-            <span className="text-nauma-600 font-bold text-sm">{produit.prixDetail.toFixed(2)} MAD</span>
-            <span className="text-gray-400"> / {produit.unite}</span>
-          </p>
-        )}
-
-        {/* CTA */}
+        {/* CTA — bouton arrondi pleine largeur */}
         <Link
           href={`/produits/${produit.slug}`}
           className={clsx(
-            "block text-center text-xs font-bold py-2.5 px-3 uppercase tracking-wider transition-colors",
+            "w-full text-center text-xs font-semibold py-2 px-3 rounded-full transition-colors",
             produit.disponible
               ? "bg-nauma-600 text-white hover:bg-nauma-700"
               : "bg-gray-100 text-gray-400 pointer-events-none"

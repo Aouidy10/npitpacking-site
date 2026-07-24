@@ -9,9 +9,16 @@ import { PRODUITS_DEMO } from "@/lib/produits";
 import { CATEGORIES_CONFIG } from "@/lib/categories";
 import { Produit, Categorie } from "@/types";
 import clsx from "clsx";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, Search, SlidersHorizontal } from "lucide-react";
 
 const VALID_CATS = CATEGORIES_CONFIG.map((c) => c.slug) as Categorie[];
+
+const TRI_OPTIONS = [
+  { value: "default", label: "Tri par défaut" },
+  { value: "az",      label: "Nom A → Z" },
+  { value: "za",      label: "Nom Z → A" },
+  { value: "nouveau", label: "Nouveautés" },
+];
 
 function CatalogueContent() {
   const searchParams = useSearchParams();
@@ -21,11 +28,14 @@ function CatalogueContent() {
   const initialCat: Categorie | "tous" =
     paramCat && VALID_CATS.includes(paramCat) ? paramCat : "tous";
 
-  const [categorie, setCategorie]       = useState<Categorie | "tous">(initialCat);
+  const [categorie, setCategorie]         = useState<Categorie | "tous">(initialCat);
   const [sousCategorie, setSousCategorie] = useState<string>(paramSub);
-  const [mode, setMode]                 = useState<"detail" | "gros">("detail");
-  const [produits, setProduits]         = useState<Produit[]>(PRODUITS_DEMO);
-  const [loading, setLoading]           = useState(true);
+  const [produits, setProduits]           = useState<Produit[]>(PRODUITS_DEMO);
+  const [loading, setLoading]             = useState(true);
+  const [search, setSearch]               = useState("");
+  const [tri, setTri]                     = useState("default");
+  const [catOpen, setCatOpen]             = useState<Record<string, boolean>>({});
+  const [sidebarOpen, setSidebarOpen]     = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -33,7 +43,7 @@ function CatalogueContent() {
         const snap = await getDocs(collection(db, "produits"));
         if (!snap.empty)
           setProduits(snap.docs.map((d) => ({ id: d.id, ...d.data() } as Produit)));
-      } catch { /* Firestore indisponible → garder PRODUITS_DEMO */ }
+      } catch { /* garder PRODUITS_DEMO */ }
       finally { setLoading(false); }
     })();
   }, []);
@@ -43,6 +53,9 @@ function CatalogueContent() {
     setSousCategorie("");
   };
 
+  const toggleCatOpen = (slug: string) =>
+    setCatOpen((prev) => ({ ...prev, [slug]: !prev[slug] }));
+
   const sousCats =
     categorie !== "tous"
       ? CATEGORIES_CONFIG.find((c) => c.slug === categorie)?.sousCats ?? []
@@ -51,9 +64,19 @@ function CatalogueContent() {
   const produitsFiltres = useMemo(() => {
     let list = produits;
     if (categorie !== "tous") list = list.filter((p) => p.categorie === categorie);
-    if (sousCategorie)         list = list.filter((p) => p.sousCategorie === sousCategorie);
+    if (sousCategorie)        list = list.filter((p) => p.sousCategorie === sousCategorie);
+    if (search.trim().length >= 2) {
+      const q = search.toLowerCase();
+      list = list.filter((p) =>
+        p.nom.toLowerCase().includes(q) ||
+        p.description.toLowerCase().includes(q)
+      );
+    }
+    if (tri === "az")      list = [...list].sort((a, b) => a.nom.localeCompare(b.nom));
+    if (tri === "za")      list = [...list].sort((a, b) => b.nom.localeCompare(a.nom));
+    if (tri === "nouveau") list = [...list].filter((p) => p.badge === "nouveau").concat(list.filter((p) => p.badge !== "nouveau"));
     return list;
-  }, [categorie, sousCategorie, produits]);
+  }, [categorie, sousCategorie, produits, search, tri]);
 
   const mainCatLabel =
     categorie !== "tous"
@@ -64,130 +87,164 @@ function CatalogueContent() {
     ? sousCats.find((s) => s.slug === sousCategorie)?.label
     : null;
 
-  return (
-    <div className="container-main py-10">
-      {/* Header + breadcrumb */}
-      <div className="mb-6">
-        <h1 className="section-title mb-1">Catalogue</h1>
-        <div className="flex items-center gap-1 text-sm text-gray-400">
-          <button onClick={() => handleMainCat("tous")} className="hover:text-nauma-600 transition-colors">
-            Tous les produits
-          </button>
-          {mainCatLabel && (
-            <>
-              <ChevronRight className="w-3.5 h-3.5" />
-              <button
-                onClick={() => setSousCategorie("")}
-                className="hover:text-nauma-600 transition-colors"
-              >
-                {mainCatLabel}
-              </button>
-            </>
-          )}
-          {subCatLabel && (
-            <>
-              <ChevronRight className="w-3.5 h-3.5" />
-              <span className="text-gray-700">{subCatLabel}</span>
-            </>
-          )}
-        </div>
+  /* ── Sidebar (partagé desktop + mobile) ── */
+  const Sidebar = () => (
+    <div className="space-y-1">
+      {/* Barre de recherche */}
+      <div className="relative mb-4">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+        <input
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Rechercher des produits"
+          className="w-full pl-9 pr-3 py-2 border border-gray-200 text-sm placeholder-gray-400 focus:outline-none focus:border-nauma-600 rounded-sm"
+        />
       </div>
 
-      {/* Filtre catégories principales */}
-      <div className="flex flex-wrap gap-2 mb-3">
-        <button
-          onClick={() => handleMainCat("tous")}
-          className={clsx(
-            "px-4 py-2 rounded-full text-sm font-medium border transition-all",
-            categorie === "tous"
-              ? "bg-nauma-600 text-white border-nauma-600"
-              : "bg-white text-gray-600 border-gray-200 hover:border-nauma-600 hover:text-nauma-600"
-          )}
-        >
-          Tous
-        </button>
-        {CATEGORIES_CONFIG.map((cat) => (
-          <button
-            key={cat.slug}
-            onClick={() => handleMainCat(cat.slug)}
-            className={clsx(
-              "px-4 py-2 rounded-full text-sm font-medium border transition-all",
-              categorie === cat.slug
-                ? "bg-nauma-600 text-white border-nauma-600"
-                : "bg-white text-gray-600 border-gray-200 hover:border-nauma-600 hover:text-nauma-600"
-            )}
-          >
-            {cat.label}
-          </button>
-        ))}
+      <p className="text-sm font-bold text-gray-700 mb-3">Nos Produits</p>
 
-        {/* Toggle Détail / Gros */}
-        <div className="ml-auto flex bg-gray-100 rounded-full p-0.5 text-sm">
-          <button
-            onClick={() => setMode("detail")}
-            className={clsx(
-              "px-4 py-1.5 rounded-full font-medium transition-all",
-              mode === "detail" ? "bg-white text-nauma-700 shadow-sm" : "text-gray-500"
-            )}
-          >
-            Détail
-          </button>
-          <button
-            onClick={() => setMode("gros")}
-            className={clsx(
-              "px-4 py-1.5 rounded-full font-medium transition-all",
-              mode === "gros" ? "bg-white text-nauma-700 shadow-sm" : "text-gray-500"
-            )}
-          >
-            Gros
-          </button>
-        </div>
-      </div>
+      {/* Tous */}
+      <button
+        onClick={() => { handleMainCat("tous"); setSidebarOpen(false); }}
+        className={clsx(
+          "w-full text-left text-sm py-1.5 px-2 transition-colors",
+          categorie === "tous" ? "text-nauma-600 font-semibold" : "text-gray-500 hover:text-nauma-600"
+        )}
+      >
+        Tous les produits
+      </button>
 
-      {/* Filtre sous-catégories */}
-      {sousCats.length > 0 && (
-        <div className="flex flex-wrap gap-2 mb-6 pl-1 border-l-2 border-nauma-teal">
-          <button
-            onClick={() => setSousCategorie("")}
-            className={clsx(
-              "px-3 py-1 rounded-full text-xs font-medium border transition-all",
-              !sousCategorie
-                ? "bg-nauma-teal text-white border-nauma-teal"
-                : "bg-white text-gray-500 border-gray-200 hover:border-nauma-teal hover:text-nauma-teal"
-            )}
-          >
-            Tous
-          </button>
-          {sousCats.map((sub) => (
+      {/* Catégories avec sous-catégories */}
+      {CATEGORIES_CONFIG.map((cat) => {
+        const isActive = categorie === cat.slug;
+        const isOpen   = catOpen[cat.slug] ?? isActive;
+        return (
+          <div key={cat.slug}>
             <button
-              key={sub.slug}
-              onClick={() => setSousCategorie(sub.slug)}
+              onClick={() => {
+                handleMainCat(cat.slug);
+                toggleCatOpen(cat.slug);
+                setSidebarOpen(false);
+              }}
               className={clsx(
-                "px-3 py-1 rounded-full text-xs font-medium border transition-all",
-                sousCategorie === sub.slug
-                  ? "bg-nauma-teal text-white border-nauma-teal"
-                  : "bg-white text-gray-500 border-gray-200 hover:border-nauma-teal hover:text-nauma-teal"
+                "w-full flex items-center justify-between text-sm py-1.5 px-2 transition-colors",
+                isActive ? "text-nauma-600 font-semibold" : "text-gray-500 hover:text-nauma-600"
               )}
             >
-              {sub.label}
+              <span>{cat.label}</span>
+              {cat.sousCats.length > 0 && (
+                <ChevronRight className={clsx("w-3.5 h-3.5 transition-transform", isOpen && "rotate-90")} />
+              )}
             </button>
-          ))}
+
+            {/* Sous-catégories */}
+            {isOpen && cat.sousCats.map((sub) => (
+              <button
+                key={sub.slug}
+                onClick={() => { setSousCategorie(sub.slug); setCategorie(cat.slug); setSidebarOpen(false); }}
+                className={clsx(
+                  "w-full text-left text-xs py-1.5 pl-5 pr-2 flex items-center gap-1.5 transition-colors",
+                  sousCategorie === sub.slug
+                    ? "text-nauma-600 font-semibold"
+                    : "text-gray-400 hover:text-nauma-600"
+                )}
+              >
+                <span className="w-1 h-1 rounded-full bg-current flex-shrink-0" />
+                {sub.label}
+              </button>
+            ))}
+          </div>
+        );
+      })}
+    </div>
+  );
+
+  return (
+    <div className="container-main py-8">
+      {/* Breadcrumb */}
+      <div className="flex items-center gap-1 text-xs text-gray-400 mb-6">
+        <button onClick={() => handleMainCat("tous")} className="hover:text-nauma-600">Catalogue</button>
+        {mainCatLabel && (
+          <>
+            <ChevronRight className="w-3 h-3" />
+            <button onClick={() => setSousCategorie("")} className="hover:text-nauma-600">{mainCatLabel}</button>
+          </>
+        )}
+        {subCatLabel && (
+          <>
+            <ChevronRight className="w-3 h-3" />
+            <span className="text-gray-700">{subCatLabel}</span>
+          </>
+        )}
+      </div>
+
+      <div className="flex gap-8">
+
+        {/* ─── Sidebar desktop ───────────────────────────── */}
+        <aside className="hidden md:block w-56 flex-shrink-0">
+          <Sidebar />
+        </aside>
+
+        {/* ─── Contenu principal ─────────────────────────── */}
+        <div className="flex-1 min-w-0">
+
+          {/* Barre du haut : count + filtre mobile + tri */}
+          <div className="flex items-center justify-between mb-5 gap-3">
+            <p className="text-sm text-gray-400">
+              {loading
+                ? "Chargement…"
+                : `Affichage de 1–${produitsFiltres.length} sur ${produitsFiltres.length} résultat${produitsFiltres.length > 1 ? "s" : ""}`}
+            </p>
+
+            <div className="flex items-center gap-2">
+              {/* Bouton sidebar mobile */}
+              <button
+                className="md:hidden flex items-center gap-1.5 border border-gray-200 px-3 py-1.5 text-xs text-gray-600"
+                onClick={() => setSidebarOpen(true)}
+              >
+                <SlidersHorizontal className="w-3.5 h-3.5" />
+                Filtrer
+              </button>
+
+              {/* Tri */}
+              <select
+                value={tri}
+                onChange={(e) => setTri(e.target.value)}
+                className="border border-gray-200 text-sm px-3 py-1.5 text-gray-600 focus:outline-none focus:border-nauma-600"
+              >
+                {TRI_OPTIONS.map((o) => (
+                  <option key={o.value} value={o.value}>{o.label}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* Grille produits */}
+          {produitsFiltres.length === 0 ? (
+            <div className="py-24 text-center text-gray-400 text-sm">
+              Aucun produit dans cette catégorie.
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+              {produitsFiltres.map((p) => (
+                <ProductCard key={p.id} produit={p} />
+              ))}
+            </div>
+          )}
         </div>
-      )}
+      </div>
 
-      <p className="text-sm text-gray-400 mb-4">
-        {loading
-          ? "Chargement…"
-          : `${produitsFiltres.length} produit${produitsFiltres.length > 1 ? "s" : ""}`}
-      </p>
-
-      {produitsFiltres.length === 0 ? (
-        <div className="text-center py-20 text-gray-400">Aucun produit dans cette catégorie.</div>
-      ) : (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {produitsFiltres.map((p) => (
-            <ProductCard key={p.id} produit={p} defaultMode={mode} />
-          ))}
+      {/* ─── Sidebar mobile (drawer) ─────────────────────── */}
+      {sidebarOpen && (
+        <div className="fixed inset-0 z-50 flex md:hidden">
+          <div className="absolute inset-0 bg-black/40" onClick={() => setSidebarOpen(false)} />
+          <div className="relative bg-white w-72 h-full overflow-y-auto p-5 shadow-2xl">
+            <div className="flex items-center justify-between mb-5">
+              <p className="font-bold text-gray-800">Filtrer</p>
+              <button onClick={() => setSidebarOpen(false)} className="text-gray-400 text-xl leading-none">✕</button>
+            </div>
+            <Sidebar />
+          </div>
         </div>
       )}
     </div>
