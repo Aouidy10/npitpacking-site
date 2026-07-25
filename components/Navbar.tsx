@@ -3,10 +3,11 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
-import { Menu, X, Phone, MessageCircle, ChevronDown } from "lucide-react";
+import { Menu, X, Phone, MessageCircle, ChevronDown, ShoppingCart } from "lucide-react";
 import clsx from "clsx";
 import SearchModal from "@/components/SearchModal";
 import { CATEGORIES_CONFIG } from "@/lib/categories";
+import { useCart } from "@/context/CartContext";
 
 const NAV_LINKS = [
   { href: "/",         label: "Accueil" },
@@ -17,8 +18,9 @@ const NAV_LINKS = [
 ];
 
 export default function Navbar() {
-  const [open, setOpen]   = useState(false);
+  const [open, setOpen]       = useState(false);
   const [catOpen, setCatOpen] = useState(false);
+  const { totalItems }        = useCart();
 
   return (
     <header className="sticky top-0 z-40 bg-white shadow-sm">
@@ -73,8 +75,17 @@ export default function Navbar() {
             <SearchModal variant="bar" />
           </div>
 
-          {/* Desktop CTA */}
+          {/* Desktop CTA + Panier */}
           <div className="hidden md:flex items-center gap-3 flex-shrink-0">
+            {/* Icône panier */}
+            <Link href="/panier" className="relative p-2 text-gray-600 hover:text-nauma-600 transition-colors">
+              <ShoppingCart className="w-5 h-5" />
+              {totalItems > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 bg-nauma-600 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+                  {totalItems > 99 ? "99+" : totalItems}
+                </span>
+              )}
+            </Link>
             <Link
               href="/devis"
               className="bg-nauma-600 hover:bg-nauma-700 text-white text-xs font-bold px-5 py-2.5 uppercase tracking-wider transition-colors"
@@ -83,9 +94,17 @@ export default function Navbar() {
             </Link>
           </div>
 
-          {/* Mobile : recherche + burger */}
-          <div className="flex items-center gap-2 md:hidden ml-auto">
+          {/* Mobile : recherche + panier + burger */}
+          <div className="flex items-center gap-1 md:hidden ml-auto">
             <SearchModal />
+            <Link href="/panier" className="relative p-2 text-gray-600">
+              <ShoppingCart className="w-5 h-5" />
+              {totalItems > 0 && (
+                <span className="absolute top-0.5 right-0.5 bg-nauma-600 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+                  {totalItems > 99 ? "99+" : totalItems}
+                </span>
+              )}
+            </Link>
             <button className="p-2" onClick={() => setOpen(!open)} aria-label="Menu">
               {open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>

@@ -3,25 +3,29 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ChevronRight, ChevronLeft, Minus, Plus, Package, MessageCircle, X, ZoomIn } from "lucide-react";
+import { ChevronRight, ChevronLeft, Minus, Plus, Package, MessageCircle, X, ZoomIn, ShoppingCart, Check } from "lucide-react";
 import { Produit, Variante } from "@/types";
 import { getCloudinaryUrl } from "@/lib/cloudinary";
 import { PRODUITS_DEMO } from "@/lib/produits";
 import { CATEGORIES_CONFIG } from "@/lib/categories";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+import { useCart } from "@/context/CartContext";
+import { buildCartId } from "@/lib/cart";
 import clsx from "clsx";
 
 export default function ProduitDetail({ slug }: { slug: string }) {
   const [produit, setProduit] = useState<Produit | null>(
     PRODUITS_DEMO.find((p) => p.slug === slug) ?? null
   );
-  const [loading, setLoading]     = useState(!produit);
-  const [imgIdx, setImgIdx]       = useState(0);
-  const [variante, setVariante]   = useState<Variante | null>(null);
-  const [quantite, setQuantite]   = useState(1);
-  const [lightbox, setLightbox]   = useState(false);
+  const [loading, setLoading]         = useState(!produit);
+  const [imgIdx, setImgIdx]           = useState(0);
+  const [variante, setVariante]       = useState<Variante | null>(null);
+  const [quantite, setQuantite]       = useState(1);
+  const [lightbox, setLightbox]       = useState(false);
   const [lightboxIdx, setLightboxIdx] = useState(0);
+  const [added, setAdded]             = useState(false);
+  const { add: addToCart }            = useCart();
 
   useEffect(() => {
     if (produit) return;
@@ -115,6 +119,22 @@ export default function ProduitDetail({ slug }: { slug: string }) {
 
   const whatsappMsg = `Bonjour, je voudrais commander :\n- Produit : ${produit.nom}${activeVar ? `\n- Type : ${activeVar.nom}` : ""}\n- Quantité : ${quantite} ${produit.unite}(s)`;
   const whatsappUrl = `https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "212600000000"}?text=${encodeURIComponent(whatsappMsg)}`;
+
+  const handleAddToCart = () => {
+    if (!produit) return;
+    addToCart({
+      id: buildCartId(produit.id, activeVar?.nom),
+      produitId: produit.id,
+      produitNom: produit.nom,
+      produitSlug: produit.slug,
+      produitImage: produit.images[0] ?? "",
+      variante: activeVar?.nom,
+      varianteImage: activeVar?.image,
+      quantite,
+    });
+    setAdded(true);
+    setTimeout(() => setAdded(false), 2000);
+  };
 
   return (
     <>
@@ -320,27 +340,40 @@ export default function ProduitDetail({ slug }: { slug: string }) {
                 </button>
               </div>
 
-              {/* CTA principal */}
+              {/* Bouton Ajouter au panier */}
+              <button
+                onClick={handleAddToCart}
+                className={clsx(
+                  "flex-1 flex items-center justify-center gap-2 font-bold py-3 px-6 rounded-full uppercase tracking-wider text-sm transition-all",
+                  added
+                    ? "bg-green-500 text-white"
+                    : "bg-nauma-600 hover:bg-nauma-700 text-white"
+                )}
+              >
+                {added ? (
+                  <><Check className="w-4 h-4" /> Ajouté au panier !</>
+                ) : (
+                  <><ShoppingCart className="w-4 h-4" /> Ajouter au devis</>
+                )}
+              </button>
+            </div>
+
+            {/* Lien panier + WhatsApp direct */}
+            <div className="flex items-center gap-4">
+              <Link href="/panier" className="flex items-center gap-2 text-nauma-600 hover:text-nauma-700 text-sm font-semibold transition-colors">
+                <ShoppingCart className="w-4 h-4" />
+                Voir le panier
+              </Link>
               <a
                 href={whatsappUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex-1 flex items-center justify-center gap-2 bg-nauma-600 hover:bg-nauma-700 text-white font-bold py-3 px-6 rounded-full uppercase tracking-wider text-sm transition-colors"
+                className="flex items-center gap-2 text-green-600 hover:text-green-700 text-sm font-medium transition-colors"
               >
-                AJOUTER AU DEVIS
+                <MessageCircle className="w-4 h-4" />
+                Commander par WhatsApp
               </a>
             </div>
-
-            {/* WhatsApp secondaire */}
-            <a
-              href={whatsappUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 text-green-600 hover:text-green-700 text-sm font-medium transition-colors w-fit"
-            >
-              <MessageCircle className="w-4 h-4" />
-              Commander directement par WhatsApp
-            </a>
 
             {/* ── Métadonnées ─── */}
             <div className="border-t border-gray-100 pt-5 space-y-2 text-sm text-gray-500">
@@ -446,28 +479,23 @@ export default function ProduitDetail({ slug }: { slug: string }) {
       <div className="fixed bottom-0 left-0 right-0 md:hidden bg-white border-t border-gray-100 px-4 py-3 z-40 shadow-[0_-4px_24px_rgba(0,0,0,0.08)]">
         <div className="flex items-center gap-3 max-w-lg mx-auto">
           <div className="flex items-center border border-gray-200 rounded-full overflow-hidden flex-shrink-0">
-            <button
-              onClick={() => setQuantite(Math.max(1, quantite - 1))}
-              className="w-9 h-9 flex items-center justify-center text-gray-500"
-            >
+            <button onClick={() => setQuantite(Math.max(1, quantite - 1))} className="w-9 h-9 flex items-center justify-center text-gray-500">
               <Minus className="w-3 h-3" />
             </button>
             <span className="w-8 text-center text-sm font-semibold">{quantite}</span>
-            <button
-              onClick={() => setQuantite(quantite + 1)}
-              className="w-9 h-9 flex items-center justify-center text-gray-500"
-            >
+            <button onClick={() => setQuantite(quantite + 1)} className="w-9 h-9 flex items-center justify-center text-gray-500">
               <Plus className="w-3 h-3" />
             </button>
           </div>
-          <a
-            href={whatsappUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex-1 bg-nauma-600 text-white text-center py-3 rounded-full font-bold text-sm uppercase tracking-wider"
+          <button
+            onClick={handleAddToCart}
+            className={clsx(
+              "flex-1 text-center py-3 rounded-full font-bold text-sm uppercase tracking-wider transition-all flex items-center justify-center gap-2",
+              added ? "bg-green-500 text-white" : "bg-nauma-600 text-white"
+            )}
           >
-            AJOUTER AU DEVIS
-          </a>
+            {added ? <><Check className="w-4 h-4" /> Ajouté !</> : <><ShoppingCart className="w-4 h-4" /> Ajouter au devis</>}
+          </button>
         </div>
       </div>
     </>

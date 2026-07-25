@@ -4,6 +4,7 @@ import AnnouncementBar from "@/components/AnnouncementBar";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import FloatingWhatsApp from "@/components/FloatingWhatsApp";
+import { CartProvider } from "@/context/CartContext";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://npitpacking.com"),
@@ -23,11 +24,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="fr">
       <body>
-        <AnnouncementBar />
-        <Navbar />
-        <main className="min-h-screen">{children}</main>
-        <Footer />
-        <FloatingWhatsApp />
+        <CartProvider>
+          <AnnouncementBar />
+          <Navbar />
+          <main className="min-h-screen">{children}</main>
+          <Footer />
+          <FloatingWhatsApp />
+        </CartProvider>
       </body>
     </html>
   );
