@@ -12,6 +12,7 @@ import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useCart } from "@/context/CartContext";
 import { buildCartId } from "@/lib/cart";
+import ProductCard from "@/components/ProductCard";
 import clsx from "clsx";
 
 export default function ProduitDetail({ slug }: { slug: string }) {
@@ -25,6 +26,7 @@ export default function ProduitDetail({ slug }: { slug: string }) {
   const [lightbox, setLightbox]       = useState(false);
   const [lightboxIdx, setLightboxIdx] = useState(0);
   const [added, setAdded]             = useState(false);
+  const [similaires, setSimilaires]   = useState<Produit[]>([]);
   const { add: addToCart }            = useCart();
 
   useEffect(() => {
@@ -41,6 +43,27 @@ export default function ProduitDetail({ slug }: { slug: string }) {
       }
     })();
   }, [slug, produit]);
+
+  /* Produits similaires — même catégorie, hors produit actuel */
+  useEffect(() => {
+    if (!produit) return;
+    const demoSim = PRODUITS_DEMO
+      .filter((p) => p.categorie === produit.categorie && p.slug !== produit.slug)
+      .slice(0, 6);
+    setSimilaires(demoSim);
+    (async () => {
+      try {
+        const snap = await getDocs(
+          query(collection(db, "produits"), where("categorie", "==", produit.categorie))
+        );
+        const all = snap.docs
+          .map((d) => ({ id: d.id, ...d.data() } as Produit))
+          .filter((p) => p.slug !== produit.slug)
+          .slice(0, 6);
+        if (all.length > 0) setSimilaires(all);
+      } catch { /* garder démo */ }
+    })();
+  }, [produit]);
 
   /* Clavier pour le lightbox */
   useEffect(() => {
@@ -400,6 +423,32 @@ export default function ProduitDetail({ slug }: { slug: string }) {
           </div>
         </div>
       </div>
+
+      {/* ─── Produits similaires ────────────────────────── */}
+      {similaires.length > 0 && (
+        <section className="border-t border-gray-100 bg-gray-50">
+          <div className="container-main py-10 pb-28 md:pb-10">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-lg font-bold text-gray-800">Produits similaires</h2>
+                <div className="w-10 h-0.5 bg-nauma-600 mt-1" />
+              </div>
+              <Link
+                href={`/catalogue?cat=${produit.categorie}`}
+                className="text-xs text-nauma-600 hover:underline font-medium"
+              >
+                Voir toute la catégorie →
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
+              {similaires.map((p) => (
+                <ProductCard key={p.id} produit={p} />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* ─── Lightbox plein écran ───────────────────────── */}
       {lightbox && (
