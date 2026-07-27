@@ -71,7 +71,7 @@ export default function HeroSlider() {
               className="inline-block text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full mb-5"
               style={{ background: s.accent + "33", border: `1px solid ${s.accent}66`, color: "white" }}
             >
-              NPITPACKING — Division NPTI
+              NPITPACKING — Division NPIT
             </span>
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold leading-tight mb-4" style={{ textWrap: "balance" }}>
               {s.title}

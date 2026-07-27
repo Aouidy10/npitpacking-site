@@ -47,7 +47,7 @@ export default function AdminGuard({ children }: { children: ReactNode }) {
         <form onSubmit={handleLogin} className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 w-80 space-y-4">
           <div className="flex items-center gap-2 text-nauma-600 font-bold text-lg mb-2">
             <Package className="w-5 h-5" />
-            NPTI Admin
+            NPIT Admin
           </div>
           <input
             type="password"

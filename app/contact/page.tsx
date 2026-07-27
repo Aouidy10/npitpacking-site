@@ -23,7 +23,7 @@ export default function ContactPage() {
   const [sent, setSent] = useState(false);
 
   const quickWhatsApp = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
-    "Bonjour NPTI Packing, je souhaite avoir des informations sur vos produits."
+    "Bonjour NPIT Packing, je souhaite avoir des informations sur vos produits."
   )}`;
 
   const handleSubmit = (e: React.FormEvent) => {

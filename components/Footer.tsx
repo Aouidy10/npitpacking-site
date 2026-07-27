@@ -8,10 +8,10 @@ export default function Footer() {
         <div>
           <div className="flex items-center gap-2 text-white font-bold text-lg mb-3">
             <Package className="w-5 h-5 text-nauma-teal" />
-            NPTI Packing
+            NPIT Packing
           </div>
           <p className="text-sm text-gray-400 leading-relaxed">
-            Pôle emballage de NPTI — New Pact Industry and Trade. Cellophane, serviettes, papier cuisson et sacs — vente détail et gros.
+            Pôle emballage de NPIT — New Pact Industry and Trade. Cellophane, serviettes, papier cuisson et sacs — vente détail et gros.
           </p>
         </div>
 
@@ -37,7 +37,7 @@ export default function Footer() {
       </div>
 
       <div className="border-t border-nauma-800 text-center text-xs text-gray-600 py-4">
-        © {new Date().getFullYear()} NPTI – New Pact Industry and Trade — Tous droits réservés
+        © {new Date().getFullYear()} NPIT – New Pact Industry and Trade — Tous droits réservés
       </div>
     </footer>
   );

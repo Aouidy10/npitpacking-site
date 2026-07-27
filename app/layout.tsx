@@ -8,10 +8,10 @@ import { CartProvider } from "@/context/CartContext";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://npitpacking.com"),
-  title: "NPTI Packing Maroc — Cellophane, Serviettes, Papier Cuisson, Sacs",
+  title: "NPIT Packing Maroc — Cellophane, Serviettes, Papier Cuisson, Sacs",
   description:
     "Vente de papier et emballage au Maroc : cellophane, serviettes, papier cuisson, sacs kraft. Prix détail et gros. Livraison dans tout le Maroc.",
-  keywords: ["emballage maroc", "cellophane", "serviettes", "papier cuisson", "sacs kraft", "grossiste emballage", "NPTI Packing"],
+  keywords: ["emballage maroc", "cellophane", "serviettes", "papier cuisson", "sacs kraft", "grossiste emballage", "NPIT Packing"],
   openGraph: {
     siteName: "NPITPACKING",
     url: "https://npitpacking.com",

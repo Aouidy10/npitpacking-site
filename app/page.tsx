@@ -42,7 +42,7 @@ const AVANTAGES = [
 const TEMOIGNAGES = [
   { nom: "Hassan B.", ville: "Casablanca", note: 5, texte: "Très bonne qualité, livraison rapide. J'achète régulièrement les rouleaux cellophane pour mon restaurant." },
   { nom: "Fatima Z.", ville: "Marrakech",  note: 5, texte: "Prix compétitifs et service professionnel. La commande gros est vraiment avantageuse pour mon café." },
-  { nom: "Youssef M.", ville: "Fès",       note: 5, texte: "NPTI Packing est mon fournisseur principal. Les boîtes pizza et gobelets sont de très bonne qualité." },
+  { nom: "Youssef M.", ville: "Fès",       note: 5, texte: "NPIT Packing est mon fournisseur principal. Les boîtes pizza et gobelets sont de très bonne qualité." },
   { nom: "Sara A.",    ville: "Rabat",     note: 4, texte: "Livraison dans tout le Maroc comme promis. Très satisfaite du papier aluminium et du film alimentaire." },
   { nom: "Omar K.",    ville: "Tanger",    note: 5, texte: "Excellente communication via WhatsApp, réponse rapide. Je recommande à tous les professionnels." },
 ];

@@ -28,7 +28,7 @@ export default function Navbar() {
       {/* ─── Barre secondaire (teinte nauma) ────────────── */}
       <div className="hidden md:flex bg-nauma-600 text-white/80 text-[11px]">
         <div className="max-w-6xl mx-auto px-4 w-full flex items-center justify-between h-8">
-          <span className="font-medium tracking-wide">NPITPACKING — Division NPTI · Emballages professionnels au Maroc</span>
+          <span className="font-medium tracking-wide">NPITPACKING — Division NPIT · Emballages professionnels au Maroc</span>
           <div className="flex items-center gap-5">
             <a
               href={`tel:+212600000000`}
@@ -66,7 +66,7 @@ export default function Navbar() {
             />
             <div className="flex flex-col leading-none">
               <span className="font-black text-sm tracking-widest text-nauma-600 uppercase">NPITPACKING</span>
-              <span className="text-[9px] font-medium text-nauma-teal tracking-wider uppercase">Division NPTI</span>
+              <span className="text-[9px] font-medium text-nauma-teal tracking-wider uppercase">Division NPIT</span>
             </div>
           </Link>
 
