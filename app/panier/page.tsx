@@ -11,15 +11,21 @@ export default function PanierPage() {
 
   const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "212600000000";
 
+  const totalGeneral = items.reduce((s, i) => s + (i.prixUnit || 0) * i.quantite, 0);
+  const hasAnyPrice  = items.some((i) => (i.prixUnit || 0) > 0);
+
   const buildWhatsappMsg = () => {
     const lines = items.map((item) => {
-      const varStr = item.variante ? ` — ${item.variante}` : "";
-      return `• ${item.produitNom}${varStr} × ${item.quantite}`;
+      const varStr  = item.variante ? ` — ${item.variante}` : "";
+      const prixStr = item.prixUnit ? ` (${(item.prixUnit * item.quantite).toFixed(2)} MAD)` : "";
+      return `• ${item.produitNom}${varStr} × ${item.quantite}${prixStr}`;
     });
+    const totalStr = hasAnyPrice ? `\n\n💰 Total estimé : ${totalGeneral.toFixed(2)} MAD` : "";
     return (
       `Bonjour, je voudrais passer une demande de devis :\n\n` +
       lines.join("\n") +
-      `\n\nMerci de me contacter pour confirmer les prix et la disponibilité.`
+      totalStr +
+      `\n\nMerci de me contacter pour confirmer et livrer.`
     );
   };
 
@@ -51,11 +57,13 @@ export default function PanierPage() {
         {/* ── Liste produits ── */}
         <div className="lg:col-span-2">
           <div className="bg-white border border-gray-100">
+
             {/* En-têtes */}
-            <div className="grid grid-cols-12 gap-4 px-4 py-3 border-b border-gray-100 text-xs font-bold text-gray-400 uppercase tracking-wide">
-              <div className="col-span-6">Produit</div>
-              <div className="col-span-4 text-center">Quantité</div>
-              <div className="col-span-2" />
+            <div className="grid grid-cols-12 gap-2 px-4 py-3 border-b border-gray-100 text-xs font-bold text-gray-400 uppercase tracking-wide">
+              <div className="col-span-5">Produit</div>
+              <div className="col-span-3 text-center">Quantité</div>
+              <div className="col-span-3 text-right">Sous-total</div>
+              <div className="col-span-1" />
             </div>
 
             {/* Lignes */}
@@ -65,50 +73,60 @@ export default function PanierPage() {
                 : item.produitImage
                   ? getCloudinaryUrl(item.produitImage, 120)
                   : "/placeholder-product.svg";
+              const sousTotal = (item.prixUnit || 0) * item.quantite;
 
               return (
-                <div key={item.id} className="grid grid-cols-12 gap-4 px-4 py-4 border-b border-gray-50 items-center hover:bg-gray-50 transition-colors">
+                <div key={item.id} className="grid grid-cols-12 gap-2 px-4 py-4 border-b border-gray-50 items-center hover:bg-gray-50 transition-colors">
+
                   {/* Produit */}
-                  <div className="col-span-6 flex items-center gap-3">
-                    <Link href={`/produits/${item.produitSlug}`} className="relative flex-shrink-0 w-16 h-16 bg-gray-50 border border-gray-100 overflow-hidden">
-                      <Image src={imgSrc} alt={item.produitNom} fill className="object-contain p-1" sizes="64px" />
+                  <div className="col-span-5 flex items-center gap-3">
+                    <Link href={`/produits/${item.produitSlug}`} className="relative flex-shrink-0 w-14 h-14 bg-gray-50 border border-gray-100 overflow-hidden">
+                      <Image src={imgSrc} alt={item.produitNom} fill className="object-contain p-1" sizes="56px" />
                     </Link>
-                    <div>
-                      <Link href={`/produits/${item.produitSlug}`} className="text-sm font-semibold text-gray-800 hover:text-nauma-600 transition-colors line-clamp-2">
+                    <div className="min-w-0">
+                      <Link href={`/produits/${item.produitSlug}`} className="text-sm font-semibold text-gray-800 hover:text-nauma-600 transition-colors line-clamp-2 leading-tight">
                         {item.produitNom}
                       </Link>
                       {item.variante && (
                         <p className="text-xs text-nauma-teal font-medium mt-0.5">{item.variante}</p>
                       )}
+                      {item.prixUnit > 0 && (
+                        <p className="text-xs text-gray-400 mt-0.5">{item.prixUnit.toFixed(2)} MAD / unité</p>
+                      )}
                     </div>
                   </div>
 
                   {/* Quantité */}
-                  <div className="col-span-4 flex items-center justify-center">
+                  <div className="col-span-3 flex items-center justify-center">
                     <div className="flex items-center border border-gray-200 rounded-full overflow-hidden">
                       <button
                         onClick={() => setQty(item.id, item.quantite - 1)}
-                        className="w-8 h-8 flex items-center justify-center text-gray-500 hover:bg-gray-50 transition-colors"
+                        className="w-7 h-7 flex items-center justify-center text-gray-500 hover:bg-gray-50 transition-colors"
                       >
                         <Minus className="w-3 h-3" />
                       </button>
-                      <span className="w-10 text-center text-sm font-semibold text-gray-800">{item.quantite}</span>
+                      <span className="w-8 text-center text-sm font-semibold text-gray-800">{item.quantite}</span>
                       <button
                         onClick={() => setQty(item.id, item.quantite + 1)}
-                        className="w-8 h-8 flex items-center justify-center text-gray-500 hover:bg-gray-50 transition-colors"
+                        className="w-7 h-7 flex items-center justify-center text-gray-500 hover:bg-gray-50 transition-colors"
                       >
                         <Plus className="w-3 h-3" />
                       </button>
                     </div>
                   </div>
 
+                  {/* Sous-total */}
+                  <div className="col-span-3 text-right">
+                    {sousTotal > 0 ? (
+                      <span className="text-sm font-bold text-nauma-600">{sousTotal.toFixed(2)} MAD</span>
+                    ) : (
+                      <span className="text-xs text-gray-400">—</span>
+                    )}
+                  </div>
+
                   {/* Supprimer */}
-                  <div className="col-span-2 flex justify-end">
-                    <button
-                      onClick={() => remove(item.id)}
-                      className="text-gray-300 hover:text-red-400 transition-colors p-1"
-                      title="Retirer"
-                    >
+                  <div className="col-span-1 flex justify-end">
+                    <button onClick={() => remove(item.id)} className="text-gray-300 hover:text-red-400 transition-colors p-1" title="Retirer">
                       <X className="w-4 h-4" />
                     </button>
                   </div>
@@ -116,12 +134,9 @@ export default function PanierPage() {
               );
             })}
 
-            {/* Bouton mettre à jour / continuer */}
-            <div className="px-4 py-4 flex items-center gap-3">
-              <Link
-                href="/catalogue"
-                className="flex items-center gap-2 text-sm text-gray-500 hover:text-nauma-600 transition-colors"
-              >
+            {/* Continuer */}
+            <div className="px-4 py-4">
+              <Link href="/catalogue" className="flex items-center gap-2 text-sm text-gray-500 hover:text-nauma-600 transition-colors w-fit">
                 <ArrowLeft className="w-4 h-4" />
                 Continuer mes achats
               </Link>
@@ -129,29 +144,46 @@ export default function PanierPage() {
           </div>
         </div>
 
-        {/* ── Récapitulatif & Soumettre ── */}
+        {/* ── Récapitulatif ── */}
         <div className="lg:col-span-1">
           <div className="bg-white border border-gray-100 p-6 sticky top-32">
-            <h2 className="text-lg font-bold text-gray-800 mb-6">Total panier</h2>
+            <h2 className="text-lg font-bold text-gray-800 mb-5">Total panier</h2>
 
-            {/* Récap articles */}
-            <div className="space-y-2 mb-6 text-sm text-gray-500">
-              {items.map((item) => (
-                <div key={item.id} className="flex justify-between gap-2">
-                  <span className="truncate">
-                    {item.produitNom}
-                    {item.variante && <span className="text-nauma-teal ml-1">({item.variante})</span>}
-                  </span>
-                  <span className="flex-shrink-0 font-medium text-gray-700">× {item.quantite}</span>
+            {/* Récap lignes */}
+            <div className="space-y-2 mb-4 text-sm">
+              {items.map((item) => {
+                const st = (item.prixUnit || 0) * item.quantite;
+                return (
+                  <div key={item.id} className="flex justify-between gap-2">
+                    <span className="text-gray-500 truncate leading-tight">
+                      {item.produitNom}
+                      {item.variante && <span className="text-nauma-teal ml-1 text-xs">({item.variante})</span>}
+                      <span className="text-gray-400 ml-1">×{item.quantite}</span>
+                    </span>
+                    <span className="flex-shrink-0 font-semibold text-gray-700">
+                      {st > 0 ? `${st.toFixed(2)} MAD` : "—"}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Total général */}
+            {hasAnyPrice && (
+              <div className="border-t border-gray-100 pt-4 mb-5">
+                <div className="flex justify-between items-center">
+                  <span className="font-bold text-gray-800">Total estimé</span>
+                  <span className="text-xl font-extrabold text-nauma-600">{totalGeneral.toFixed(2)} MAD</span>
                 </div>
-              ))}
-            </div>
+                <p className="text-xs text-gray-400 mt-1">Prix indicatifs — confirmés à la commande</p>
+              </div>
+            )}
 
-            <div className="border-t border-gray-100 pt-4 mb-6">
-              <p className="text-xs text-gray-400">
-                Les prix seront confirmés par notre équipe via WhatsApp après réception de votre demande.
-              </p>
-            </div>
+            {!hasAnyPrice && (
+              <div className="border-t border-gray-100 pt-4 mb-5">
+                <p className="text-xs text-gray-400">Les prix seront confirmés via WhatsApp.</p>
+              </div>
+            )}
 
             {/* Bouton soumettre */}
             <a
@@ -163,10 +195,7 @@ export default function PanierPage() {
               <MessageCircle className="w-4 h-4" />
               Soumettre ma demande
             </a>
-
-            <p className="text-center text-xs text-gray-400 mt-3">
-              Vous serez redirigé vers WhatsApp
-            </p>
+            <p className="text-center text-xs text-gray-400 mt-3">Vous serez redirigé vers WhatsApp</p>
           </div>
         </div>
 

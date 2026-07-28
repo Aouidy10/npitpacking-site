@@ -145,6 +145,7 @@ export default function ProduitDetail({ slug }: { slug: string }) {
 
   const handleAddToCart = () => {
     if (!produit) return;
+    const prixUnit = activeVar?.prixDetail || produit.prixDetail || 0;
     addToCart({
       id: buildCartId(produit.id, activeVar?.nom),
       produitId: produit.id,
@@ -154,6 +155,7 @@ export default function ProduitDetail({ slug }: { slug: string }) {
       variante: activeVar?.nom,
       varianteImage: activeVar?.image,
       quantite,
+      prixUnit,
     });
     setAdded(true);
     setTimeout(() => setAdded(false), 2000);

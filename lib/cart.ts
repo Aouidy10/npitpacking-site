@@ -7,6 +7,7 @@ export interface CartItem {
   variante?: string;
   varianteImage?: string;
   quantite: number;
+  prixUnit: number;    // prix unitaire au moment de l'ajout
 }
 
 export function buildCartId(produitId: string, variante?: string) {
