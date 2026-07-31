@@ -98,12 +98,17 @@ export default function ProduitDetail({ slug }: { slug: string }) {
   const catConfig    = CATEGORIES_CONFIG.find((c) => c.slug === produit.categorie);
   const catLabel     = catConfig?.label ?? produit.categorie;
 
+  /* Prix : par unité → par colis */
+  const prixUnitBase = activeVar?.prixDetail || produit.prixDetail || 0;
+  const colisCount   = produit.colis ?? 0;
+  const prixParColis = colisCount > 0 ? prixUnitBase * colisCount : prixUnitBase;
+
   /* ── Galerie combinée : images de base + images des variantes ── */
   type GalleryEntry = { src: string; varianteIdx?: number };
   const gallery: GalleryEntry[] = [
     ...produit.images.filter(Boolean).map((src) => ({ src })),
     ...(produit.variantes ?? [])
-      .map((v, vi) => v.image ? { src: v.image, varianteIdx: vi } : null)
+      .map((v, vi): GalleryEntry | null => v.image ? { src: v.image, varianteIdx: vi } : null)
       .filter((x): x is GalleryEntry => x !== null),
   ];
   if (gallery.length === 0) gallery.push({ src: "" });
@@ -140,12 +145,12 @@ export default function ProduitDetail({ slug }: { slug: string }) {
     }
   };
 
-  const whatsappMsg = `Bonjour, je voudrais commander :\n- Produit : ${produit.nom}${activeVar ? `\n- Type : ${activeVar.nom}` : ""}\n- Quantité : ${quantite} ${produit.unite}(s)`;
+  const uniteLabel  = colisCount > 0 ? `colis (${quantite * colisCount} unités)` : (produit.unite || "unité") + "(s)";
+  const whatsappMsg = `Bonjour, je voudrais commander :\n- Produit : ${produit.nom}${activeVar ? `\n- Type : ${activeVar.nom}` : ""}\n- Quantité : ${quantite} ${uniteLabel}`;
   const whatsappUrl = `https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "212600000000"}?text=${encodeURIComponent(whatsappMsg)}`;
 
   const handleAddToCart = () => {
     if (!produit) return;
-    const prixUnit = activeVar?.prixDetail || produit.prixDetail || 0;
     addToCart({
       id: buildCartId(produit.id, activeVar?.nom),
       produitId: produit.id,
@@ -155,7 +160,8 @@ export default function ProduitDetail({ slug }: { slug: string }) {
       variante: activeVar?.nom,
       varianteImage: activeVar?.image,
       quantite,
-      prixUnit,
+      prixUnit: prixParColis,
+      colis: colisCount > 0 ? colisCount : undefined,
     });
     setAdded(true);
     setTimeout(() => setAdded(false), 2000);
@@ -304,6 +310,13 @@ export default function ProduitDetail({ slug }: { slug: string }) {
             <h1 className="text-2xl md:text-3xl font-bold text-gray-800 leading-snug">
               {produit.nom}
             </h1>
+
+            {/* Info colis (sans prix) */}
+            {colisCount > 0 && (
+              <p className="text-xs text-amber-700 bg-amber-50 border border-amber-100 rounded-full px-3 py-1.5 w-fit">
+                Vendu par colis de {colisCount} unités — minimum 1 colis
+              </p>
+            )}
 
             {/* Description */}
             {produit.description && (

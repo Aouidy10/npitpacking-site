@@ -4,32 +4,13 @@ import { useCart } from "@/context/CartContext";
 import { getCloudinaryUrl } from "@/lib/cloudinary";
 import Image from "next/image";
 import Link from "next/link";
-import { Minus, Plus, X, ShoppingCart, ArrowLeft, MessageCircle } from "lucide-react";
+import { Minus, Plus, X, ShoppingCart, ArrowLeft, ChevronRight } from "lucide-react";
 
 export default function PanierPage() {
   const { items, remove, setQty, totalItems } = useCart();
 
-  const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "212600000000";
-
   const totalGeneral = items.reduce((s, i) => s + (i.prixUnit || 0) * i.quantite, 0);
   const hasAnyPrice  = items.some((i) => (i.prixUnit || 0) > 0);
-
-  const buildWhatsappMsg = () => {
-    const lines = items.map((item) => {
-      const varStr  = item.variante ? ` — ${item.variante}` : "";
-      const prixStr = item.prixUnit ? ` (${(item.prixUnit * item.quantite).toFixed(2)} MAD)` : "";
-      return `• ${item.produitNom}${varStr} × ${item.quantite}${prixStr}`;
-    });
-    const totalStr = hasAnyPrice ? `\n\n💰 Total estimé : ${totalGeneral.toFixed(2)} MAD` : "";
-    return (
-      `Bonjour, je voudrais passer une demande de devis :\n\n` +
-      lines.join("\n") +
-      totalStr +
-      `\n\nMerci de me contacter pour confirmer et livrer.`
-    );
-  };
-
-  const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(buildWhatsappMsg())}`;
 
   if (items.length === 0) {
     return (
@@ -48,7 +29,7 @@ export default function PanierPage() {
   return (
     <div className="container-main py-10">
       <h1 className="text-2xl font-bold text-gray-800 mb-8">
-        Demande de devis
+        Panier
         <span className="ml-3 text-sm font-normal text-gray-400">{totalItems} article{totalItems > 1 ? "s" : ""}</span>
       </h1>
 
@@ -91,7 +72,9 @@ export default function PanierPage() {
                         <p className="text-xs text-nauma-teal font-medium mt-0.5">{item.variante}</p>
                       )}
                       {item.prixUnit > 0 && (
-                        <p className="text-xs text-gray-400 mt-0.5">{item.prixUnit.toFixed(2)} MAD / unité</p>
+                        <p className="text-xs text-gray-400 mt-0.5">
+                          {item.prixUnit.toFixed(2)} MAD {item.colis ? `/ colis (${item.colis} unités)` : "/ unité"}
+                        </p>
                       )}
                     </div>
                   </div>
@@ -101,14 +84,14 @@ export default function PanierPage() {
                     <div className="flex items-center border border-gray-200 rounded-full overflow-hidden">
                       <button
                         onClick={() => setQty(item.id, item.quantite - 1)}
-                        className="w-7 h-7 flex items-center justify-center text-gray-500 hover:bg-gray-50 transition-colors"
+                        className="w-8 h-8 flex items-center justify-center text-gray-500 hover:bg-gray-50 transition-colors"
                       >
                         <Minus className="w-3 h-3" />
                       </button>
-                      <span className="w-8 text-center text-sm font-semibold text-gray-800">{item.quantite}</span>
+                      <span className="w-10 text-center text-sm font-semibold text-gray-800">{item.quantite}</span>
                       <button
                         onClick={() => setQty(item.id, item.quantite + 1)}
-                        className="w-7 h-7 flex items-center justify-center text-gray-500 hover:bg-gray-50 transition-colors"
+                        className="w-8 h-8 flex items-center justify-center text-gray-500 hover:bg-gray-50 transition-colors"
                       >
                         <Plus className="w-3 h-3" />
                       </button>
@@ -149,7 +132,6 @@ export default function PanierPage() {
           <div className="bg-white border border-gray-100 p-6 sticky top-32">
             <h2 className="text-lg font-bold text-gray-800 mb-5">Total panier</h2>
 
-            {/* Récap lignes */}
             <div className="space-y-2 mb-4 text-sm">
               {items.map((item) => {
                 const st = (item.prixUnit || 0) * item.quantite;
@@ -168,7 +150,6 @@ export default function PanierPage() {
               })}
             </div>
 
-            {/* Total général */}
             {hasAnyPrice && (
               <div className="border-t border-gray-100 pt-4 mb-5">
                 <div className="flex justify-between items-center">
@@ -181,21 +162,17 @@ export default function PanierPage() {
 
             {!hasAnyPrice && (
               <div className="border-t border-gray-100 pt-4 mb-5">
-                <p className="text-xs text-gray-400">Les prix seront confirmés via WhatsApp.</p>
+                <p className="text-xs text-gray-400">Les prix seront confirmés après votre demande.</p>
               </div>
             )}
 
-            {/* Bouton soumettre */}
-            <a
-              href={whatsappUrl}
-              target="_blank"
-              rel="noopener noreferrer"
+            <Link
+              href="/commande"
               className="flex items-center justify-center gap-2 w-full bg-nauma-600 hover:bg-nauma-700 text-white font-bold py-3.5 rounded-full uppercase tracking-wider text-sm transition-colors"
             >
-              <MessageCircle className="w-4 h-4" />
-              Soumettre ma demande
-            </a>
-            <p className="text-center text-xs text-gray-400 mt-3">Vous serez redirigé vers WhatsApp</p>
+              Soumettre votre demande de devis
+              <ChevronRight className="w-4 h-4" />
+            </Link>
           </div>
         </div>
 

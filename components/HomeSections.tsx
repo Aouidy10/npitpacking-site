@@ -68,11 +68,7 @@ export default function HomeSections() {
                     </h3>
                     <p className="text-sm text-gray-500 mt-1 line-clamp-2">{p.description}</p>
                   </div>
-                  <div className="relative flex items-center justify-between mt-4">
-                    <span className="text-nauma-600 font-bold text-lg">
-                      {p.prixDetail} MAD
-                      <span className="text-xs font-normal text-gray-400"> /{p.unite}</span>
-                    </span>
+                  <div className="relative flex items-center justify-end mt-4">
                     <span className="text-xs font-semibold text-nauma-teal bg-white border border-nauma-teal px-3 py-1.5 rounded-full group-hover:bg-nauma-teal group-hover:text-white transition-colors">
                       Voir le produit →
                     </span>
@@ -102,9 +98,7 @@ export default function HomeSections() {
                   <div className="flex-1 min-w-0">
                     <h3 className="font-bold text-sm text-gray-800 group-hover:text-nauma-teal transition-colors truncate">{p.nom}</h3>
                     <p className="text-xs text-gray-400 mt-0.5 truncate capitalize">{p.sousCategorie?.replace(/-/g, " ")}</p>
-                    <p className="text-nauma-600 font-bold text-sm mt-1">
-                      {p.prixDetail} MAD <span className="text-xs font-normal text-gray-400">/{p.unite}</span>
-                    </p>
+                    <p className="text-xs text-nauma-teal font-medium mt-1">Voir le produit →</p>
                   </div>
                   <span className="text-nauma-teal text-xs font-bold flex-shrink-0">→</span>
                 </Link>

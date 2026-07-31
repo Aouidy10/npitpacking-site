@@ -1,7 +1,8 @@
 import Link from "next/link";
-import { Truck, BadgeCheck, Package, Phone, Star } from "lucide-react";
+import { BadgeCheck, Package, Phone, Star, RefreshCw, Headphones } from "lucide-react";
 import HeroSlider from "@/components/HeroSlider";
 import HomeSections from "@/components/HomeSections";
+import PromoBanners from "@/components/PromoBanners";
 import { PRODUITS_DEMO } from "@/lib/produits";
 import { CATEGORIES_CONFIG } from "@/lib/categories";
 import {
@@ -32,11 +33,11 @@ const CAT_COLORS: Record<Categorie, string> = {
   "verre-cristal":           "#1a3a5c",
 };
 
-const AVANTAGES = [
-  { icon: Truck,      titre: "Livraison Maroc",  desc: "Livraison rapide dans toutes les villes" },
-  { icon: BadgeCheck, titre: "Qualité garantie", desc: "Produits conformes aux normes alimentaires" },
-  { icon: Package,    titre: "Détail & Gros",    desc: "Prix spéciaux à partir de certaines quantités" },
-  { icon: Phone,      titre: "Support WhatsApp", desc: "Réponse rapide pour toute commande" },
+const SERVICES = [
+  { icon: BadgeCheck, titre: "Qualité garantie",   desc: "Produits conformes aux normes alimentaires" },
+  { icon: Package,    titre: "Large gamme",         desc: "Des milliers de références d'emballage" },
+  { icon: RefreshCw,  titre: "Retrait & Échange",  desc: "Retour ou échange produit facilité" },
+  { icon: Headphones, titre: "Service après-vente", desc: "Assistance client dédiée via WhatsApp" },
 ];
 
 const TEMOIGNAGES = [
@@ -121,48 +122,26 @@ export default function HomePage() {
       </section>
 
       {/* ─── Bannières promo ────────────────────────────────── */}
-      <section className="bg-gray-50 border-b border-gray-100">
-        <div className="container-main py-6">
-          <div className="grid md:grid-cols-3 gap-4">
-            {[
-              { titre: "Emballage alimentaire", desc: "Barquettes, gobelets, films alimentaires", href: "/catalogue?cat=emballage-alimentaire", bg: "#1B3266" },
-              { titre: "Emballage biodégradable", desc: "Boîtes pizza, gobelets carton, éco-responsable", href: "/catalogue?cat=emballage-biodegradable", bg: "#2d6a4f" },
-              { titre: "Commande en gros", desc: "Prix préférentiels — devis gratuit et rapide", href: "/devis", bg: "#C8A46E" },
-            ].map((p) => (
-              <Link
-                key={p.href}
-                href={p.href}
-                className="flex items-center gap-4 p-5 text-white hover:opacity-90 transition-opacity"
-                style={{ background: p.bg }}
-              >
-                <div className="flex-1">
-                  <h3 className="font-bold text-sm">{p.titre}</h3>
-                  <p className="text-white/70 text-xs mt-0.5">{p.desc}</p>
-                </div>
-                <span className="text-white/60 text-lg font-light">→</span>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
+      <PromoBanners />
 
       {/* ─── Nouveautés + Best-Sellers (Firestore) ──────────── */}
       <div className="bg-gray-50">
         <HomeSections />
       </div>
 
-      {/* ─── Avantages ──────────────────────────────────────── */}
+      {/* ─── Nos Services ───────────────────────────────────── */}
       <section className="bg-white border-y border-gray-100">
-        <div className="container-main py-10">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {AVANTAGES.map((a) => (
-              <div key={a.titre} className="flex flex-col items-center text-center gap-3">
-                <div className="w-12 h-12 rounded-full bg-nauma-50 flex items-center justify-center text-nauma-600">
-                  <a.icon className="w-5 h-5" />
+        <div className="container-main py-12">
+          <h2 className="text-2xl font-bold text-gray-800 text-center mb-10">Nos Services</h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 divide-x divide-gray-100">
+            {SERVICES.map((s) => (
+              <div key={s.titre} className="flex flex-col items-center text-center gap-4 px-4">
+                <div className="w-16 h-16 flex items-center justify-center">
+                  <s.icon className="w-10 h-10 text-gray-700" strokeWidth={1.3} />
                 </div>
                 <div>
-                  <h3 className="font-bold text-sm text-gray-800">{a.titre}</h3>
-                  <p className="text-gray-400 text-xs mt-1 leading-relaxed">{a.desc}</p>
+                  <h3 className="font-bold text-sm text-gray-800">{s.titre}</h3>
+                  <p className="text-gray-400 text-xs mt-1 leading-relaxed">{s.desc}</p>
                 </div>
               </div>
             ))}

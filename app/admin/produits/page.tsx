@@ -139,7 +139,7 @@ function ProduitsAdmin() {
   };
 
   return (
-    <div className="container-main py-8">
+    <div className="p-8 max-w-7xl">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-xl font-bold text-gray-800">Gestion des produits</h1>
         <button onClick={openAdd} className="btn-primary flex items-center gap-2 text-sm py-2.5">
@@ -204,7 +204,12 @@ function ProduitsAdmin() {
                       {p.categorie.replace("-", " ")}
                     </span>
                   </td>
-                  <td className="px-4 py-3 font-semibold text-emerald-700">{p.prixDetail} MAD</td>
+                  <td className="px-4 py-3 font-semibold text-emerald-700">
+                    {(p.colis ?? 0) > 0
+                      ? <>{(p.prixDetail * (p.colis ?? 1)).toFixed(2)} MAD<span className="text-[10px] text-gray-400 font-normal ml-1">/colis</span></>
+                      : <>{p.prixDetail} MAD</>
+                    }
+                  </td>
                   <td className="px-4 py-3 text-gray-600">{p.prixGros} MAD</td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
@@ -367,7 +372,7 @@ function ProduitsAdmin() {
                       type="number"
                       value={form.colis || ""}
                       onChange={(e) => handleField("colis", e.target.value)}
-                      placeholder="ex: 50, 100, 200"
+                      placeholder="ex: 6, 12, 24"
                       min="0"
                       className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-nauma-teal bg-white"
                     />
@@ -391,7 +396,9 @@ function ProduitsAdmin() {
               {/* Prix */}
               <div className="grid grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Prix détail (MAD) *</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Prix / unité (détail) *
+                  </label>
                   <input
                     type="number"
                     value={form.prixDetail || ""}
@@ -401,6 +408,16 @@ function ProduitsAdmin() {
                     step="0.5"
                     className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-emerald-400"
                   />
+                  {(form.colis ?? 0) > 0 && (form.prixDetail ?? 0) > 0 && (
+                    <p className="text-xs mt-1 text-emerald-700 font-semibold">
+                      = {form.prixDetail} × {form.colis} = {((form.prixDetail ?? 0) * (form.colis ?? 0)).toFixed(2)} MAD / colis
+                    </p>
+                  )}
+                  {(form.colis ?? 0) > 0 && !(form.prixDetail ?? 0) && (
+                    <p className="text-xs mt-1 text-gray-400">
+                      Entrez le prix par unité — le colis sera calculé automatiquement
+                    </p>
+                  )}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Prix gros (MAD) *</label>

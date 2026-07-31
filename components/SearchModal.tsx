@@ -97,7 +97,7 @@ export default function SearchModal({ variant }: { variant?: "bar" | "icon" }) {
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-semibold text-gray-800 truncate">{p.nom}</p>
-                          <p className="text-xs text-gray-400">{p.categorie.replace("-", " ")} · {p.prixDetail} MAD</p>
+                          <p className="text-xs text-gray-400 capitalize">{p.categorie.replace(/-/g, " ")}</p>
                         </div>
                         <span className="text-xs text-nauma-teal font-medium flex-shrink-0">→</span>
                       </Link>

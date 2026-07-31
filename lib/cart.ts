@@ -7,7 +7,8 @@ export interface CartItem {
   variante?: string;
   varianteImage?: string;
   quantite: number;
-  prixUnit: number;    // prix unitaire au moment de l'ajout
+  prixUnit: number;    // prix par colis (si colis > 0) ou par unité
+  colis?: number;      // nb d'unités par colis ; undefined = vendu à l'unité
 }
 
 export function buildCartId(produitId: string, variante?: string) {
