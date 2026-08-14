@@ -4,10 +4,20 @@ import { Produit } from "@/types";
 import { getCloudinaryUrl } from "@/lib/cloudinary";
 import clsx from "clsx";
 
+const PLACEHOLDER_BY_CAT: Record<string, string> = {
+  "hygiene":                 "/placeholder-hygiene.svg",
+  "emballage-alimentaire":   "/placeholder-alimentaire.svg",
+  "emballage-biodegradable": "/placeholder-biodegradable.svg",
+  "papier":                  "/placeholder-papier.svg",
+  "plastique":               "/placeholder-plastique.svg",
+  "verre-cristal":           "/placeholder-verre.svg",
+};
+
 export default function ProductCard({ produit }: { produit: Produit }) {
+  const placeholder = PLACEHOLDER_BY_CAT[produit.categorie] ?? "/placeholder-product.svg";
   const imageUrl = produit.images[0]
     ? getCloudinaryUrl(produit.images[0], 500)
-    : "/placeholder-product.svg";
+    : placeholder;
 
   const hasVariants = (produit.variantes ?? []).length > 0;
 

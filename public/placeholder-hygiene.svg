@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400">
+  <rect width="400" height="400" fill="#f0f9ff"/>
+  <!-- Roll body -->
+  <ellipse cx="200" cy="195" rx="75" ry="85" fill="#e0f2fe" stroke="#bae6fd" stroke-width="2"/>
+  <ellipse cx="200" cy="195" rx="55" ry="63" fill="#f0f9ff" stroke="#bae6fd" stroke-width="1.5"/>
+  <!-- Perforations lines -->
+  <line x1="125" y1="175" x2="275" y2="175" stroke="#bae6fd" stroke-width="1" stroke-dasharray="4 4"/>
+  <line x1="125" y1="195" x2="275" y2="195" stroke="#bae6fd" stroke-width="1" stroke-dasharray="4 4"/>
+  <line x1="125" y1="215" x2="275" y2="215" stroke="#bae6fd" stroke-width="1" stroke-dasharray="4 4"/>
+  <!-- Tube shadow -->
+  <ellipse cx="200" cy="195" rx="18" ry="20" fill="#bae6fd" opacity="0.5"/>
+  <!-- Label -->
+  <rect x="130" y="280" width="140" height="28" rx="14" fill="#0ea5e9" opacity="0.15"/>
+  <text x="200" y="299" text-anchor="middle" fill="#0369a1" font-size="13" font-family="Arial, sans-serif" font-weight="600">Hygiène &amp; Papier</text>
+</svg>

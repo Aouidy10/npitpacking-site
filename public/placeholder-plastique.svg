@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400">
+  <rect width="400" height="400" fill="#faf5ff"/>
+  <!-- Bag body -->
+  <path d="M155 170 Q140 175 138 240 Q136 295 200 298 Q264 295 262 240 Q260 175 245 170Z" fill="#e9d5ff" stroke="#c4b5fd" stroke-width="2"/>
+  <!-- Bag top handles -->
+  <path d="M172 170 Q172 140 185 135 Q200 130 215 135 Q228 140 228 170" fill="none" stroke="#c4b5fd" stroke-width="3" stroke-linecap="round"/>
+  <!-- Bag shine -->
+  <path d="M165 185 Q160 200 162 220" stroke="white" stroke-width="3" stroke-linecap="round" opacity="0.6"/>
+  <!-- Tie at top -->
+  <rect x="180" y="167" width="40" height="8" rx="4" fill="#a78bfa"/>
+  <!-- Label -->
+  <rect x="125" y="315" width="150" height="28" rx="14" fill="#7c3aed" opacity="0.12"/>
+  <text x="200" y="334" text-anchor="middle" fill="#6d28d9" font-size="13" font-family="Arial, sans-serif" font-weight="600">Plastique</text>
+</svg>

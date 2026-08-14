@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400">
+  <rect width="400" height="400" fill="#f0fdf4"/>
+  <!-- Box body -->
+  <rect x="130" y="170" width="140" height="100" rx="6" fill="#bbf7d0" stroke="#86efac" stroke-width="2"/>
+  <!-- Box flaps open -->
+  <path d="M130 170 L160 140 L240 140 L270 170" fill="#86efac" stroke="#4ade80" stroke-width="1.5"/>
+  <line x1="200" y1="140" x2="200" y2="170" stroke="#4ade80" stroke-width="1.5"/>
+  <!-- Leaf -->
+  <path d="M200 105 Q220 85 245 95 Q235 120 210 118 Q215 105 200 105Z" fill="#4ade80" opacity="0.7"/>
+  <path d="M200 105 Q178 88 155 97 Q167 122 192 119 Q185 106 200 105Z" fill="#22c55e" opacity="0.5"/>
+  <line x1="200" y1="118" x2="200" y2="140" stroke="#16a34a" stroke-width="1.5"/>
+  <!-- Eco label -->
+  <rect x="115" y="285" width="170" height="28" rx="14" fill="#22c55e" opacity="0.15"/>
+  <text x="200" y="304" text-anchor="middle" fill="#15803d" font-size="13" font-family="Arial, sans-serif" font-weight="600">Biodégradable</text>
+</svg>

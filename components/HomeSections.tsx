@@ -6,8 +6,16 @@ import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { Produit } from "@/types";
 import ProductCard from "@/components/ProductCard";
-import { Package } from "lucide-react";
 import { getCloudinaryUrl } from "@/lib/cloudinary";
+
+const PLACEHOLDER_BY_CAT: Record<string, string> = {
+  "hygiene":                 "/placeholder-hygiene.svg",
+  "emballage-alimentaire":   "/placeholder-alimentaire.svg",
+  "emballage-biodegradable": "/placeholder-biodegradable.svg",
+  "papier":                  "/placeholder-papier.svg",
+  "plastique":               "/placeholder-plastique.svg",
+  "verre-cristal":           "/placeholder-verre.svg",
+};
 
 export default function HomeSections() {
   const [nouveaux,    setNouveaux]    = useState<Produit[]>([]);
@@ -90,10 +98,11 @@ export default function HomeSections() {
                 >
                   <span className="bg-nauma-teal text-white text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest absolute top-3 left-3">NEW</span>
                   <div className="w-16 h-16 rounded-xl bg-nauma-50 flex items-center justify-center flex-shrink-0 mt-3 ml-2 overflow-hidden">
-                    {p.images[0]
-                      ? <img src={getCloudinaryUrl(p.images[0], 80)} alt={p.nom} className="w-full h-full object-cover" />
-                      : <Package className="w-7 h-7 text-nauma-300" />
-                    }
+                    <img
+                      src={p.images[0] ? getCloudinaryUrl(p.images[0], 80) : (PLACEHOLDER_BY_CAT[p.categorie] ?? "/placeholder-product.svg")}
+                      alt={p.nom}
+                      className="w-full h-full object-contain p-1"
+                    />
                   </div>
                   <div className="flex-1 min-w-0">
                     <h3 className="font-bold text-sm text-gray-800 group-hover:text-nauma-teal transition-colors truncate">{p.nom}</h3>
