@@ -35,7 +35,7 @@ export default function Navbar() {
               className="flex items-center gap-1 hover:text-white transition-colors"
             >
               <Phone className="w-3 h-3" />
-              <span>+212 700-700585</span>
+              <span>+212700700585</span>
             </a>
             <a
               href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "212700700585"}?text=${encodeURIComponent("Bonjour NPIT Packing 👋, je suis intéressé(e) par vos produits d'emballage. Pouvez-vous m'aider ?")}`}

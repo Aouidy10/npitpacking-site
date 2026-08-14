@@ -32,7 +32,7 @@ export default function MentionsLegalesPage() {
               <li><span className="text-gray-400">Forme juridique :</span> Société à Responsabilité Limitée (SARL)</li>
               <li><span className="text-gray-400">Siège social :</span> Maroc</li>
               <li><span className="text-gray-400">Email :</span> contact@npitpacking.com</li>
-              <li><span className="text-gray-400">WhatsApp :</span> +212 700-700585</li>
+              <li><span className="text-gray-400">WhatsApp :</span> +212700700585</li>
             </ul>
           </Section>
 
@@ -91,7 +91,7 @@ export default function MentionsLegalesPage() {
             <p>Pour toute question relative aux présentes mentions légales :</p>
             <ul className="mt-3 space-y-1">
               <li><span className="text-gray-400">Email :</span> contact@npitpacking.com</li>
-              <li><span className="text-gray-400">WhatsApp :</span> +212 700-700585</li>
+              <li><span className="text-gray-400">WhatsApp :</span> +212700700585</li>
             </ul>
           </Section>
 

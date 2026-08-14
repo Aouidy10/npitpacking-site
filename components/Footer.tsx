@@ -39,7 +39,7 @@ export default function Footer() {
         <div>
           <h3 className="text-white font-semibold mb-3">Contact</h3>
           <ul className="space-y-2 text-sm">
-            <li className="flex items-center gap-2"><Phone className="w-4 h-4 text-nauma-teal flex-shrink-0" /> +212 700-700585</li>
+            <li className="flex items-center gap-2"><Phone className="w-4 h-4 text-nauma-teal flex-shrink-0" /> +212700700585</li>
             <li className="flex items-center gap-2"><Mail className="w-4 h-4 text-nauma-teal flex-shrink-0" /> contact@npitpacking.com</li>
             <li className="flex items-center gap-2"><MapPin className="w-4 h-4 text-nauma-teal flex-shrink-0" /> Maroc — Livraison nationale</li>
           </ul>
