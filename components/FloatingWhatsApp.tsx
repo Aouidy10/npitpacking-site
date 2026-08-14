@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 
-const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "212600000000";
-const DEFAULT_MESSAGE = "Bonjour, je suis intéressé par vos produits d'emballage NPITPACKING.";
+const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "212700700585";
+const DEFAULT_MESSAGE = "Bonjour NPIT Packing 👋, je suis intéressé(e) par vos produits d'emballage. Pouvez-vous m'aider ?";
 
 export default function FloatingWhatsApp() {
   const [hovered, setHovered] = useState(false);

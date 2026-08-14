@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Phone, Mail, MapPin, MessageCircle, Clock, Send, CheckCircle } from "lucide-react";
 
-const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "212600000000";
+const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "212700700585";
 
 const SUJETS = [
   "Information sur un produit",
@@ -64,7 +64,7 @@ export default function ContactPage() {
             </div>
             <div>
               <p className="font-semibold text-green-800 group-hover:underline">WhatsApp (recommandé)</p>
-              <p className="text-green-700 text-sm mt-0.5">+212 600-000000</p>
+              <p className="text-green-700 text-sm mt-0.5">+212 700-700585</p>
               <p className="text-green-600 text-xs mt-1">Réponse rapide — cliquez pour ouvrir WhatsApp</p>
             </div>
           </a>
@@ -75,7 +75,7 @@ export default function ContactPage() {
             </div>
             <div>
               <p className="font-semibold text-gray-800">Téléphone</p>
-              <p className="text-gray-600 text-sm mt-0.5">+212 600-000000</p>
+              <p className="text-gray-600 text-sm mt-0.5">+212 700-700585</p>
             </div>
           </div>
 

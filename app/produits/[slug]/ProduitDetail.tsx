@@ -147,7 +147,7 @@ export default function ProduitDetail({ slug }: { slug: string }) {
 
   const uniteLabel  = colisCount > 0 ? `colis (${quantite * colisCount} unités)` : (produit.unite || "unité") + "(s)";
   const whatsappMsg = `Bonjour, je voudrais commander :\n- Produit : ${produit.nom}${activeVar ? `\n- Type : ${activeVar.nom}` : ""}\n- Quantité : ${quantite} ${uniteLabel}`;
-  const whatsappUrl = `https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "212600000000"}?text=${encodeURIComponent(whatsappMsg)}`;
+  const whatsappUrl = `https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "212700700585"}?text=${encodeURIComponent(whatsappMsg)}`;
 
   const handleAddToCart = () => {
     if (!produit) return;

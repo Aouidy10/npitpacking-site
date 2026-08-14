@@ -26,7 +26,7 @@ export default function CommandePage() {
   });
   const [errors, setErrors] = useState<Partial<FormData>>({});
 
-  const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "212600000000";
+  const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "212700700585";
 
   if (items.length === 0) {
     return (
