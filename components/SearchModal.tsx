@@ -4,19 +4,39 @@ import { useState, useEffect, useRef } from "react";
 import { Search, X } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
-import { PRODUITS_DEMO } from "@/lib/produits";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "@/lib/firebase";
+import { Produit } from "@/types";
 import { getCloudinaryUrl } from "@/lib/cloudinary";
 
+const PLACEHOLDER_BY_CAT: Record<string, string> = {
+  "hygiene":                 "/placeholder-hygiene.svg",
+  "emballage-alimentaire":   "/placeholder-alimentaire.svg",
+  "emballage-biodegradable": "/placeholder-biodegradable.svg",
+  "papier":                  "/placeholder-papier.svg",
+  "plastique":               "/placeholder-plastique.svg",
+  "verre-cristal":           "/placeholder-verre.svg",
+};
+
 export default function SearchModal({ variant }: { variant?: "bar" | "icon" }) {
-  const [open, setOpen] = useState(false);
-  const [query, setQuery] = useState("");
-  const inputRef = useRef<HTMLInputElement>(null);
+  const [open, setOpen]       = useState(false);
+  const [query, setQuery]     = useState("");
+  const [produits, setProduits] = useState<Produit[]>([]);
+  const inputRef              = useRef<HTMLInputElement>(null);
+
+  /* Charger tous les produits depuis Firestore une seule fois */
+  useEffect(() => {
+    getDocs(collection(db, "produits"))
+      .then((snap) => setProduits(snap.docs.map((d) => ({ id: d.id, ...d.data() } as Produit))))
+      .catch(() => {/* silencieux si hors ligne */});
+  }, []);
 
   const results = query.trim().length >= 2
-    ? PRODUITS_DEMO.filter((p) =>
-        p.nom.toLowerCase().includes(query.toLowerCase()) ||
-        p.nomAr.includes(query) ||
-        p.description.toLowerCase().includes(query.toLowerCase())
+    ? produits.filter((p) =>
+        p.disponible !== false &&
+        (p.nom.toLowerCase().includes(query.toLowerCase()) ||
+         (p.nomAr || "").includes(query) ||
+         (p.description || "").toLowerCase().includes(query.toLowerCase()))
       ).slice(0, 6)
     : [];
 
@@ -84,7 +104,8 @@ export default function SearchModal({ variant }: { variant?: "bar" | "icon" }) {
             {results.length > 0 ? (
               <ul className="max-h-80 overflow-y-auto divide-y divide-gray-50">
                 {results.map((p) => {
-                  const img = p.images[0] ? getCloudinaryUrl(p.images[0], 80) : "/placeholder-product.svg";
+                  const placeholder = PLACEHOLDER_BY_CAT[p.categorie] ?? "/placeholder-product.svg";
+                  const img = p.images?.[0] ? getCloudinaryUrl(p.images[0], 80) : placeholder;
                   return (
                     <li key={p.id}>
                       <Link
@@ -93,11 +114,11 @@ export default function SearchModal({ variant }: { variant?: "bar" | "icon" }) {
                         className="flex items-center gap-3 px-4 py-3 hover:bg-nauma-50 transition-colors"
                       >
                         <div className="relative w-10 h-10 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
-                          <Image src={img} alt={p.nom} fill className="object-cover" sizes="40px" />
+                          <Image src={img} alt={p.nom} fill className="object-contain p-1" sizes="40px" />
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-semibold text-gray-800 truncate">{p.nom}</p>
-                          <p className="text-xs text-gray-400 capitalize">{p.categorie.replace(/-/g, " ")}</p>
+                          <p className="text-xs text-gray-400 capitalize">{(p.categorie || "").replace(/-/g, " ")}</p>
                         </div>
                         <span className="text-xs text-nauma-teal font-medium flex-shrink-0">→</span>
                       </Link>
