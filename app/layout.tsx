@@ -4,8 +4,10 @@ import AnnouncementBar from "@/components/AnnouncementBar";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import FloatingWhatsApp from "@/components/FloatingWhatsApp";
-import DevisPopup from "@/components/DevisPopup";
+import dynamic from "next/dynamic";
 import { CartProvider } from "@/context/CartContext";
+
+const DevisPopup = dynamic(() => import("@/components/DevisPopup"), { ssr: false });
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://npitpacking.com"),

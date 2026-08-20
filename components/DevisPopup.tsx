@@ -11,13 +11,15 @@ export default function DevisPopup() {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    if (sessionStorage.getItem("devis_popup_closed") === "1") return;
-    const t = setTimeout(() => setVisible(true), 300);
+    try {
+      if (sessionStorage.getItem("devis_popup_closed") === "1") return;
+    } catch { /* ignore */ }
+    const t = setTimeout(() => setVisible(true), 500);
     return () => clearTimeout(t);
   }, []);
 
   const close = () => {
-    sessionStorage.setItem("devis_popup_closed", "1");
+    try { sessionStorage.setItem("devis_popup_closed", "1"); } catch { /* ignore */ }
     setVisible(false);
   };
 
