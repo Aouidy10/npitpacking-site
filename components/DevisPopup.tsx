@@ -12,7 +12,7 @@ export default function DevisPopup() {
 
   useEffect(() => {
     if (sessionStorage.getItem("devis_popup_closed") === "1") return;
-    const t = setTimeout(() => setVisible(true), 2000);
+    const t = setTimeout(() => setVisible(true), 300);
     return () => clearTimeout(t);
   }, []);
 
