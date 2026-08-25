@@ -1,5 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  env: {
+    MAINTENANCE_MODE: "false",
+  },
   images: {
     remotePatterns: [
       {
