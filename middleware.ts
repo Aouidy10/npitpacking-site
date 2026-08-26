@@ -196,6 +196,11 @@ const HTML = `<!DOCTYPE html>
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  // En développement local → tout passer normalement
+  if (process.env.NODE_ENV === "development") {
+    return NextResponse.next();
+  }
+
   // Laisser passer : admin, API, assets Next.js, favicons, SVGs
   if (
     pathname.startsWith("/admin") ||
