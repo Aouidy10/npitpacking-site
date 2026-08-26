@@ -7,7 +7,7 @@ import FloatingWhatsApp from "@/components/FloatingWhatsApp";
 import dynamic from "next/dynamic";
 import { CartProvider } from "@/context/CartContext";
 
-const DevisPopup = dynamic(() => import("@/components/DevisPopup"), { ssr: false });
+const ActivityPopup = dynamic(() => import("@/components/ActivityPopup"), { ssr: false });
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://npitpacking.com"),
@@ -33,7 +33,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <main className="min-h-screen">{children}</main>
           <Footer />
           <FloatingWhatsApp />
-          <DevisPopup />
+          <ActivityPopup />
         </CartProvider>
       </body>
     </html>

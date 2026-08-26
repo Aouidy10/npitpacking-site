@@ -7,9 +7,10 @@ import { db } from "@/lib/firebase";
 import ProductCard from "@/components/ProductCard";
 import { PRODUITS_DEMO } from "@/lib/produits";
 import { CATEGORIES_CONFIG } from "@/lib/categories";
+import { ACTIVITE_CATS, getActivite } from "@/lib/activites";
 import { Produit, Categorie } from "@/types";
 import clsx from "clsx";
-import { ChevronRight, Search, SlidersHorizontal } from "lucide-react";
+import { ChevronRight, Search, SlidersHorizontal, X } from "lucide-react";
 
 const VALID_CATS = CATEGORIES_CONFIG.map((c) => c.slug) as Categorie[];
 
@@ -22,8 +23,12 @@ const TRI_OPTIONS = [
 
 function CatalogueContent() {
   const searchParams = useSearchParams();
-  const paramCat = searchParams.get("cat") as Categorie | null;
-  const paramSub = searchParams.get("sub") ?? "";
+  const paramCat    = searchParams.get("cat") as Categorie | null;
+  const paramSub    = searchParams.get("sub") ?? "";
+  const paramActivite = searchParams.get("activite") ?? "";
+
+  const activiteInfo   = getActivite(paramActivite);
+  const activiteCats   = paramActivite ? (ACTIVITE_CATS[paramActivite] ?? null) : null;
 
   const initialCat: Categorie | "tous" =
     paramCat && VALID_CATS.includes(paramCat) ? paramCat : "tous";
@@ -63,6 +68,9 @@ function CatalogueContent() {
 
   const produitsFiltres = useMemo(() => {
     let list = produits;
+    // Filtre par activité (si pas de catégorie spécifique sélectionnée)
+    if (activiteCats && categorie === "tous")
+      list = list.filter((p) => activiteCats.includes(p.categorie));
     if (categorie !== "tous") list = list.filter((p) => p.categorie === categorie);
     if (sousCategorie)        list = list.filter((p) => p.sousCategorie === sousCategorie);
     if (search.trim().length >= 2) {
@@ -187,6 +195,28 @@ function CatalogueContent() {
 
         {/* ─── Contenu principal ─────────────────────────── */}
         <div className="flex-1 min-w-0">
+
+          {/* Bannière activité sélectionnée */}
+          {activiteInfo && (
+            <div className="flex items-center justify-between gap-3 mb-4 bg-nauma-600/5 border border-nauma-600/20 rounded-xl px-4 py-3">
+              <div className="flex items-center gap-2">
+                <span className="text-xl">{activiteInfo.emoji}</span>
+                <div>
+                  <p className="text-sm font-bold text-nauma-600 leading-none">
+                    Produits pour {activiteInfo.label}
+                  </p>
+                  <p className="text-xs text-gray-400 mt-0.5">Sélection adaptée à votre activité</p>
+                </div>
+              </div>
+              <a
+                href="/catalogue"
+                className="flex items-center gap-1 text-xs text-gray-400 hover:text-gray-600 transition-colors whitespace-nowrap"
+              >
+                <X className="w-3.5 h-3.5" />
+                Tout afficher
+              </a>
+            </div>
+          )}
 
           {/* Barre du haut : count + filtre mobile + tri */}
           <div className="flex items-center justify-between mb-5 gap-3">
