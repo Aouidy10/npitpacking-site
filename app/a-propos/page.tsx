@@ -3,8 +3,15 @@ import Link from "next/link";
 import { Package, MapPin, Phone, Mail, CheckCircle } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "À propos — NPIT Packing Maroc",
-  description: "Découvrez NPIT Packing, division de NPIT spécialisée dans la vente d'emballages professionnels au Maroc.",
+  title: "À propos de NPIT Packing",
+  description:
+    "NPIT Packing est le spécialiste de la vente d'emballages professionnels au Maroc : cellophane, serviettes, sacs kraft, boîtes alimentaires. Découvrez notre histoire et nos valeurs.",
+  alternates: { canonical: "https://npitpacking.com/a-propos" },
+  openGraph: {
+    title: "À propos de NPIT Packing — Spécialiste emballage au Maroc",
+    description: "Découvrez NPIT Packing, votre fournisseur d'emballages professionnels au Maroc. Détail & gros, livraison nationale.",
+    url: "https://npitpacking.com/a-propos",
+  },
 };
 
 const VALEURS = [

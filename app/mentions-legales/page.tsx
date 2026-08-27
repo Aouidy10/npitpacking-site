@@ -2,8 +2,10 @@ import { Metadata } from "next";
 import { Shield } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Mentions légales — NPIT Packing Maroc",
-  description: "Mentions légales et informations juridiques de NPIT Packing, division de NPIT.",
+  title: "Mentions légales",
+  description: "Mentions légales et informations juridiques de NPIT Packing, division de NPIT — éditeur, hébergement, propriété intellectuelle, données personnelles.",
+  alternates: { canonical: "https://npitpacking.com/mentions-legales" },
+  robots: { index: false, follow: false },
 };
 
 export default function MentionsLegalesPage() {

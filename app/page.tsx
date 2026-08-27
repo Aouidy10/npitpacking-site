@@ -1,4 +1,18 @@
+import type { Metadata } from "next";
 import Link from "next/link";
+
+export const metadata: Metadata = {
+  title: "Emballages Professionnels au Maroc — Détail & Gros",
+  description:
+    "NPIT Packing : vente de cellophane, serviettes, sacs kraft, boîtes alimentaires, papier cuisson et plus. Prix détail et gros. Livraison dans tout le Maroc.",
+  alternates: { canonical: "https://npitpacking.com" },
+  openGraph: {
+    title: "NPIT Packing — Emballages Professionnels au Maroc",
+    description: "Cellophane, serviettes, sacs kraft, boîtes alimentaires — vente détail & gros. Livraison rapide partout au Maroc.",
+    url: "https://npitpacking.com",
+    type: "website",
+  },
+};
 import { BadgeCheck, Package, Phone, Star, RefreshCw, Headphones } from "lucide-react";
 import HeroSlider from "@/components/HeroSlider";
 import HomeSections from "@/components/HomeSections";

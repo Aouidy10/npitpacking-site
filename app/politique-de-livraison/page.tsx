@@ -2,8 +2,10 @@ import { Metadata } from "next";
 import { Truck, Clock, MapPin, Phone, Package, AlertCircle } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Politique de livraison — NPIT Packing Maroc",
-  description: "Informations sur les délais, zones et conditions de livraison de NPIT Packing partout au Maroc.",
+  title: "Politique de livraison",
+  description:
+    "Livraison d'emballages dans tout le Maroc — délais, zones couvertes, frais et conditions. NPIT Packing livre à Casablanca, Rabat, Marrakech, Fès, Tanger et toutes les villes du Maroc.",
+  alternates: { canonical: "https://npitpacking.com/politique-de-livraison" },
 };
 
 const ZONES = [
