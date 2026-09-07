@@ -1,19 +1,9 @@
-import type { Metadata } from "next";
+"use client";
+
 import Link from "next/link";
 import { ACTIVITES } from "@/lib/activites";
+import { useLanguage } from "@/context/LanguageContext";
 
-export const metadata: Metadata = {
-  title: "Emballages Professionnels au Maroc — Détail & Gros",
-  description:
-    "NPIT Packing : vente de cellophane, serviettes, sacs kraft, boîtes alimentaires, papier cuisson et plus. Prix détail et gros. Livraison dans tout le Maroc.",
-  alternates: { canonical: "https://npitpacking.com" },
-  openGraph: {
-    title: "NPIT Packing — Emballages Professionnels au Maroc",
-    description: "Cellophane, serviettes, sacs kraft, boîtes alimentaires — vente détail & gros. Livraison rapide partout au Maroc.",
-    url: "https://npitpacking.com",
-    type: "website",
-  },
-};
 import { BadgeCheck, Package, Phone, Star, RefreshCw, Headphones } from "lucide-react";
 import HeroSlider from "@/components/HeroSlider";
 import HomeSections from "@/components/HomeSections";
@@ -64,6 +54,8 @@ const TEMOIGNAGES = [
 ];
 
 export default function HomePage() {
+  const { t } = useLanguage();
+
   return (
     <>
       {/* ─── Hero Slider ─────────────────────────────────────── */}
@@ -73,13 +65,13 @@ export default function HomePage() {
       <section className="bg-white border-b border-gray-100">
         <div className="container-main py-12">
           <div className="text-center mb-8">
-            <h2 className="text-2xl font-bold text-gray-800">Nos Catégories</h2>
+            <h2 className="text-2xl font-bold text-gray-800">{t("home.categories")}</h2>
             <div className="w-12 h-0.5 bg-nauma-600 mx-auto mt-2" />
           </div>
 
           {/* ── Par Familles ── */}
           <div className="flex items-center gap-3 mb-4">
-            <span className="text-xs font-bold uppercase tracking-widest text-nauma-600">Par Familles</span>
+            <span className="text-xs font-bold uppercase tracking-widest text-nauma-600">{t("home.byFamily")}</span>
             <div className="flex-1 h-px bg-gray-100" />
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
@@ -141,7 +133,7 @@ export default function HomePage() {
 
           {/* ── Par Métiers ── */}
           <div className="flex items-center gap-3 mt-8 mb-4">
-            <span className="text-xs font-bold uppercase tracking-widest text-nauma-teal">Par Métiers</span>
+            <span className="text-xs font-bold uppercase tracking-widest text-nauma-teal">{t("home.byTrade")}</span>
             <div className="flex-1 h-px bg-gray-100" />
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
@@ -156,7 +148,7 @@ export default function HomePage() {
                 </div>
                 <div>
                   <p className="text-xs font-bold text-gray-700 leading-tight group-hover:text-nauma-600 transition-colors">
-                    {act.label}
+                    {t(`act.${act.id}`)}
                   </p>
                 </div>
               </Link>
@@ -176,7 +168,7 @@ export default function HomePage() {
       {/* ─── Nos Services ───────────────────────────────────── */}
       <section className="bg-white border-y border-gray-100">
         <div className="container-main py-12">
-          <h2 className="text-2xl font-bold text-gray-800 text-center mb-10">Nos Services</h2>
+          <h2 className="text-2xl font-bold text-gray-800 text-center mb-10">{t("home.services")}</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 divide-x divide-gray-100">
             {SERVICES.map((s) => (
               <div key={s.titre} className="flex flex-col items-center text-center gap-4 px-4">
@@ -197,9 +189,9 @@ export default function HomePage() {
       <section className="bg-gray-50 border-b border-gray-100">
         <div className="container-main py-12">
           <div className="text-center mb-8">
-            <h2 className="text-2xl font-bold text-gray-800">Ce que disent nos clients</h2>
+            <h2 className="text-2xl font-bold text-gray-800">{t("home.reviews")}</h2>
             <div className="w-12 h-0.5 bg-nauma-600 mx-auto mt-2" />
-            <p className="text-gray-400 text-sm mt-3">Ils nous font confiance pour leur emballage professionnel</p>
+            <p className="text-gray-400 text-sm mt-3">{t("home.reviewsSub")}</p>
           </div>
           <div className="grid md:grid-cols-5 gap-4">
             {TEMOIGNAGES.map((t) => (
@@ -224,16 +216,16 @@ export default function HomePage() {
       <section className="bg-nauma-600">
         <div className="container-main py-14 text-center text-white">
           <h2 className="text-2xl md:text-3xl font-extrabold mb-3">
-            Vous commandez en grande quantité ?
+            {t("home.cta")}
           </h2>
           <p className="text-blue-100 mb-8 max-w-lg mx-auto text-sm">
-            Bénéficiez de tarifs préférentiels pour les commandes gros. Devis gratuit et rapide sous 24h.
+            {t("home.ctaSub")}
           </p>
           <Link
             href="/devis"
             className="inline-block bg-white text-nauma-600 font-bold px-10 py-3 hover:bg-nauma-50 transition-colors"
           >
-            Demander un devis gratuit
+            {t("home.ctaBtn")}
           </Link>
         </div>
       </section>

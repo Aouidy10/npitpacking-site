@@ -4,10 +4,12 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { X } from "lucide-react";
 import { ACTIVITES } from "@/lib/activites";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function ActivityPopup() {
   const [visible, setVisible] = useState(false);
   const router = useRouter();
+  const { t } = useLanguage();
 
   useEffect(() => {
     const t = setTimeout(() => setVisible(true), 400);
@@ -44,13 +46,13 @@ export default function ActivityPopup() {
               <div className="flex items-center gap-1.5 mb-2">
                 <span className="text-[10px] font-bold uppercase tracking-widest text-[#3DAAB5]">NPIT Packing</span>
                 <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
-                <span className="text-[10px] text-gray-400">En ligne</span>
+                <span className="text-[10px] text-gray-400">{t("popup.online")}</span>
               </div>
               <h2 className="text-lg font-extrabold text-gray-900 leading-tight">
-                Votre secteur d&apos;activité ?
+                {t("popup.title")}
               </h2>
               <p className="text-xs text-gray-400 mt-0.5">
-                On sélectionne les emballages faits pour vous
+                {t("popup.sub")}
               </p>
             </div>
             <button
@@ -74,7 +76,7 @@ export default function ActivityPopup() {
                   {act.emoji}
                 </div>
                 <span className="text-[10px] font-semibold text-gray-600 group-hover:text-[#1B3266] text-center leading-tight transition-colors">
-                  {act.label}
+                  {t(`act.${act.id}`)}
                 </span>
               </button>
             ))}
@@ -86,7 +88,7 @@ export default function ActivityPopup() {
               onClick={skip}
               className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
             >
-              Voir tous les produits sans filtre →
+              {t("popup.skip")}
             </button>
           </div>
 

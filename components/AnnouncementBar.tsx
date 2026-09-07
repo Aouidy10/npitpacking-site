@@ -2,12 +2,14 @@
 
 import { useState, useEffect } from "react";
 import { X } from "lucide-react";
+import { useLanguage } from "@/context/LanguageContext";
 
 const WHATSAPP = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "212700700585";
 const DEFAULT_MSG = encodeURIComponent("Bonjour NPIT Packing 👋, je suis intéressé(e) par vos produits d'emballage. Pouvez-vous m'aider ?");
 
 export default function AnnouncementBar() {
   const [visible, setVisible] = useState(false);
+  const { t } = useLanguage();
 
   useEffect(() => {
     setVisible(sessionStorage.getItem("ann_closed") !== "1");
@@ -23,7 +25,7 @@ export default function AnnouncementBar() {
   return (
     <div className="bg-nauma-600 text-white text-xs py-2 px-4 flex items-center justify-center gap-4 relative">
       <div className="flex items-center gap-4 overflow-hidden">
-        <span className="whitespace-nowrap">🚚 Livraison dans tout le Maroc</span>
+        <span className="whitespace-nowrap">{t("ann.delivery")}</span>
         <span className="hidden sm:block opacity-40">|</span>
         <a
           href={`https://wa.me/${WHATSAPP}?text=${DEFAULT_MSG}`}
@@ -31,11 +33,11 @@ export default function AnnouncementBar() {
           rel="noopener noreferrer"
           className="hidden sm:block whitespace-nowrap hover:text-nauma-teal transition-colors font-medium"
         >
-          📞 Commander par WhatsApp →
+          {t("ann.whatsapp")}
         </a>
         <span className="hidden md:block opacity-40">|</span>
         <span className="hidden md:block whitespace-nowrap text-nauma-teal font-semibold">
-          ⭐ Prix spéciaux pour commandes gros
+          {t("ann.promo")}
         </span>
       </div>
       <button

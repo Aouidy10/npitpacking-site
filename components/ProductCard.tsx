@@ -1,8 +1,11 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
 import { Produit } from "@/types";
 import { getCloudinaryUrl } from "@/lib/cloudinary";
 import clsx from "clsx";
+import { useLanguage } from "@/context/LanguageContext";
 
 const PLACEHOLDER_BY_CAT: Record<string, string> = {
   "hygiene":                 "/placeholder-hygiene.svg",
@@ -14,6 +17,7 @@ const PLACEHOLDER_BY_CAT: Record<string, string> = {
 };
 
 export default function ProductCard({ produit }: { produit: Produit }) {
+  const { t } = useLanguage();
   const placeholder = PLACEHOLDER_BY_CAT[produit.categorie] ?? "/placeholder-product.svg";
   const imageUrl = produit.images[0]
     ? getCloudinaryUrl(produit.images[0], 500)
@@ -45,16 +49,16 @@ export default function ProductCard({ produit }: { produit: Produit }) {
             produit.badge === "promo"      && "bg-red-500",
             produit.badge === "bestseller" && "bg-nauma-gold",
           )}>
-            {produit.badge === "nouveau"    && "Nouveau"}
-            {produit.badge === "promo"      && "Promo"}
-            {produit.badge === "bestseller" && "Top vente"}
+            {produit.badge === "nouveau"    && t("card.new")}
+            {produit.badge === "promo"      && t("card.promo")}
+            {produit.badge === "bestseller" && t("card.bestseller")}
           </span>
         )}
 
         {/* Indisponible */}
         {!produit.disponible && (
           <div className="absolute inset-0 bg-white/60 flex items-center justify-center">
-            <span className="bg-gray-700 text-white text-xs font-bold px-3 py-1">Indisponible</span>
+            <span className="bg-gray-700 text-white text-xs font-bold px-3 py-1">{t("card.unavailable")}</span>
           </div>
         )}
       </Link>
