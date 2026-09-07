@@ -69,8 +69,20 @@ function CatalogueContent() {
   const produitsFiltres = useMemo(() => {
     let list = produits;
     // Filtre par activité (si pas de catégorie spécifique sélectionnée)
-    if (activiteCats && categorie === "tous")
-      list = list.filter((p) => activiteCats.includes(p.categorie));
+    if (paramActivite && categorie === "tous") {
+      // Si des produits ont le champ metiers, filtrer par métier
+      // Sinon fallback sur les catégories associées
+      const avecMetiers = list.filter((p) => p.metiers && p.metiers.length > 0);
+      if (avecMetiers.length > 0) {
+        list = list.filter((p) =>
+          p.metiers && p.metiers.length > 0
+            ? p.metiers.includes(paramActivite)
+            : activiteCats ? activiteCats.includes(p.categorie) : true
+        );
+      } else if (activiteCats) {
+        list = list.filter((p) => activiteCats.includes(p.categorie));
+      }
+    }
     if (categorie !== "tous") list = list.filter((p) => p.categorie === categorie);
     if (sousCategorie)        list = list.filter((p) => p.sousCategorie === sousCategorie);
     if (search.trim().length >= 2) {

@@ -34,6 +34,7 @@ export interface Produit {
   vedette: boolean;
   variantes?: Variante[];
   variantesLabel?: string;
+  metiers?: string[]; // ["restaurant", "cafe", "snack", ...]
 }
 
 export interface DevisFormData {

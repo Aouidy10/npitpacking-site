@@ -11,6 +11,7 @@ import AdminGuard from "@/components/AdminGuard";
 import { Plus, Pencil, Trash2, ImagePlus, X, Save, Package } from "lucide-react";
 import { Produit, Categorie, Variante } from "@/types";
 import { CATEGORIES_CONFIG } from "@/lib/categories";
+import { ACTIVITES } from "@/lib/activites";
 import clsx from "clsx";
 
 type FormData = Omit<Produit, "id"> & { id?: string };
@@ -34,6 +35,7 @@ const EMPTY_FORM: FormData = {
   vedette: false,
   variantes: [],
   variantesLabel: "",
+  metiers: [],
 };
 
 const EMPTY_VARIANTE: Variante = { nom: "", prixDetail: 0, prixGros: 0, seuilGros: 10, image: "" };
@@ -119,6 +121,7 @@ function ProduitsAdmin() {
           image: v.image || "",
         })),
         variantesLabel: form.variantesLabel || "",
+        metiers: form.metiers || [],
       };
       if (form.id) {
         await updateDoc(doc(db, "produits", form.id), data);
@@ -467,6 +470,48 @@ function ProduitsAdmin() {
                     </button>
                   ))}
                 </div>
+              </div>
+
+              {/* Métiers concernés */}
+              <div className="bg-amber-50 border border-amber-100 rounded-2xl p-4">
+                <p className="text-xs font-bold text-amber-800 uppercase tracking-wider mb-1">
+                  Métiers concernés
+                </p>
+                <p className="text-xs text-amber-600 mb-3">
+                  Sélectionnez les secteurs adaptés à ce produit
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {ACTIVITES.map((act) => {
+                    const selected = (form.metiers || []).includes(act.id);
+                    return (
+                      <button
+                        key={act.id}
+                        type="button"
+                        onClick={() => {
+                          const current = form.metiers || [];
+                          handleField(
+                            "metiers",
+                            selected
+                              ? current.filter((m) => m !== act.id)
+                              : [...current, act.id]
+                          );
+                        }}
+                        className={clsx(
+                          "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border-2 transition-all",
+                          selected
+                            ? "border-nauma-600 bg-nauma-600 text-white scale-105"
+                            : "border-gray-200 bg-white text-gray-500 hover:border-nauma-teal hover:text-nauma-teal"
+                        )}
+                      >
+                        <span>{act.emoji}</span>
+                        {act.label}
+                      </button>
+                    );
+                  })}
+                </div>
+                {(form.metiers || []).length === 0 && (
+                  <p className="text-xs text-amber-500 mt-2">⚠ Aucun métier sélectionné — ce produit n&apos;apparaîtra dans aucun filtre métier</p>
+                )}
               </div>
 
               {/* ── Variantes / Types ──────────────────────────── */}
