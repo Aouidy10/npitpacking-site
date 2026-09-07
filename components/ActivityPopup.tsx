@@ -9,21 +9,16 @@ export default function ActivityPopup() {
   const router = useRouter();
 
   useEffect(() => {
-    try {
-      if (sessionStorage.getItem("activite_selectee")) return;
-    } catch { /* ignore */ }
     const t = setTimeout(() => setVisible(true), 400);
     return () => clearTimeout(t);
   }, []);
 
   const select = (id: string) => {
-    try { sessionStorage.setItem("activite_selectee", id); } catch { /* ignore */ }
     setVisible(false);
     router.push(`/catalogue?activite=${id}`);
   };
 
   const skip = () => {
-    try { sessionStorage.setItem("activite_selectee", "tous"); } catch { /* ignore */ }
     setVisible(false);
   };
 
