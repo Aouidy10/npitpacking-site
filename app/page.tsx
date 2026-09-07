@@ -38,11 +38,11 @@ const CAT_COLORS: Record<Categorie, string> = {
   "verre-cristal":           "#1a3a5c",
 };
 
-const SERVICES = [
-  { icon: BadgeCheck, titre: "Qualité garantie",   desc: "Produits conformes aux normes alimentaires" },
-  { icon: Package,    titre: "Large gamme",         desc: "Des milliers de références d'emballage" },
-  { icon: RefreshCw,  titre: "Retrait & Échange",  desc: "Retour ou échange produit facilité" },
-  { icon: Headphones, titre: "Service après-vente", desc: "Assistance client dédiée via WhatsApp" },
+const SERVICES_KEYS = [
+  { icon: BadgeCheck, titreKey: "svc.quality",  descKey: "svc.qualitySub" },
+  { icon: Package,    titreKey: "svc.range",    descKey: "svc.rangeSub" },
+  { icon: RefreshCw,  titreKey: "svc.return",   descKey: "svc.returnSub" },
+  { icon: Headphones, titreKey: "svc.support",  descKey: "svc.supportSub" },
 ];
 
 const TEMOIGNAGES = [
@@ -95,7 +95,7 @@ export default function HomePage() {
                       <p className="text-xs font-bold text-gray-800 leading-tight">{cat.label}</p>
                       <p className="text-[10px] text-gray-400 mt-0.5">{cat.labelAr}</p>
                       {count > 0 && (
-                        <p className="text-[10px] text-nauma-teal mt-1 font-medium">{count} produits</p>
+                        <p className="text-[10px] text-nauma-teal mt-1 font-medium">{count} {t("cat.items")}</p>
                       )}
                     </div>
                   </Link>
@@ -121,7 +121,7 @@ export default function HomePage() {
                           href={`/catalogue?cat=${cat.slug}`}
                           className="flex items-center justify-center px-4 py-2 text-xs font-bold text-nauma-600 hover:bg-nauma-600 hover:text-white transition-colors border-t border-gray-100"
                         >
-                          Voir tout →
+                          {t("nav.seeAll")} →
                         </Link>
                       </div>
                     </div>
@@ -170,14 +170,14 @@ export default function HomePage() {
         <div className="container-main py-12">
           <h2 className="text-2xl font-bold text-gray-800 text-center mb-10">{t("home.services")}</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 divide-x divide-gray-100">
-            {SERVICES.map((s) => (
-              <div key={s.titre} className="flex flex-col items-center text-center gap-4 px-4">
+            {SERVICES_KEYS.map((s) => (
+              <div key={s.titreKey} className="flex flex-col items-center text-center gap-4 px-4">
                 <div className="w-16 h-16 flex items-center justify-center">
                   <s.icon className="w-10 h-10 text-gray-700" strokeWidth={1.3} />
                 </div>
                 <div>
-                  <h3 className="font-bold text-sm text-gray-800">{s.titre}</h3>
-                  <p className="text-gray-400 text-xs mt-1 leading-relaxed">{s.desc}</p>
+                  <h3 className="font-bold text-sm text-gray-800">{t(s.titreKey)}</h3>
+                  <p className="text-gray-400 text-xs mt-1 leading-relaxed">{t(s.descKey)}</p>
                 </div>
               </div>
             ))}

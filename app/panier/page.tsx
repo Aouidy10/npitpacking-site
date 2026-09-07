@@ -5,9 +5,11 @@ import { getCloudinaryUrl } from "@/lib/cloudinary";
 import Image from "next/image";
 import Link from "next/link";
 import { Minus, Plus, X, ShoppingCart, ArrowLeft, ChevronRight } from "lucide-react";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function PanierPage() {
   const { items, remove, setQty, totalItems } = useCart();
+  const { t } = useLanguage();
 
   const totalGeneral = items.reduce((s, i) => s + (i.prixUnit || 0) * i.quantite, 0);
   const hasAnyPrice  = items.some((i) => (i.prixUnit || 0) > 0);
@@ -16,11 +18,11 @@ export default function PanierPage() {
     return (
       <div className="container-main py-24 text-center">
         <ShoppingCart className="w-16 h-16 text-gray-200 mx-auto mb-5" />
-        <h1 className="text-xl font-bold text-gray-700 mb-2">Votre panier est vide</h1>
-        <p className="text-gray-400 text-sm mb-8">Parcourez notre catalogue pour ajouter des produits à votre devis.</p>
+        <h1 className="text-xl font-bold text-gray-700 mb-2">{t("cart.empty")}</h1>
+        <p className="text-gray-400 text-sm mb-8">{t("cart.emptySub")}</p>
         <Link href="/catalogue" className="inline-flex items-center gap-2 bg-nauma-600 text-white font-bold px-8 py-3 rounded-full hover:bg-nauma-700 transition-colors">
           <ArrowLeft className="w-4 h-4" />
-          Voir le catalogue
+          {t("cart.seeCatalogue")}
         </Link>
       </div>
     );
@@ -29,8 +31,10 @@ export default function PanierPage() {
   return (
     <div className="container-main py-10">
       <h1 className="text-2xl font-bold text-gray-800 mb-8">
-        Panier
-        <span className="ml-3 text-sm font-normal text-gray-400">{totalItems} article{totalItems > 1 ? "s" : ""}</span>
+        {t("cart.title")}
+        <span className="ml-3 text-sm font-normal text-gray-400">
+          {totalItems} {totalItems > 1 ? t("cart.articles") : t("cart.article")}
+        </span>
       </h1>
 
       <div className="grid lg:grid-cols-3 gap-8">
@@ -41,9 +45,9 @@ export default function PanierPage() {
 
             {/* En-têtes */}
             <div className="grid grid-cols-12 gap-2 px-4 py-3 border-b border-gray-100 text-xs font-bold text-gray-400 uppercase tracking-wide">
-              <div className="col-span-5">Produit</div>
-              <div className="col-span-3 text-center">Quantité</div>
-              <div className="col-span-3 text-right">Sous-total</div>
+              <div className="col-span-5">{t("cart.product")}</div>
+              <div className="col-span-3 text-center">{t("cart.qty")}</div>
+              <div className="col-span-3 text-right">{t("cart.subtotal")}</div>
               <div className="col-span-1" />
             </div>
 
@@ -121,7 +125,7 @@ export default function PanierPage() {
             <div className="px-4 py-4">
               <Link href="/catalogue" className="flex items-center gap-2 text-sm text-gray-500 hover:text-nauma-600 transition-colors w-fit">
                 <ArrowLeft className="w-4 h-4" />
-                Continuer mes achats
+                {t("cart.continueShopping")}
               </Link>
             </div>
           </div>
@@ -130,7 +134,7 @@ export default function PanierPage() {
         {/* ── Récapitulatif ── */}
         <div className="lg:col-span-1">
           <div className="bg-white border border-gray-100 p-6 sticky top-32">
-            <h2 className="text-lg font-bold text-gray-800 mb-5">Total panier</h2>
+            <h2 className="text-lg font-bold text-gray-800 mb-5">{t("cart.summary")}</h2>
 
             <div className="space-y-2 mb-4 text-sm">
               {items.map((item) => {
@@ -153,16 +157,16 @@ export default function PanierPage() {
             {hasAnyPrice && (
               <div className="border-t border-gray-100 pt-4 mb-5">
                 <div className="flex justify-between items-center">
-                  <span className="font-bold text-gray-800">Total estimé</span>
+                  <span className="font-bold text-gray-800">{t("cart.total")}</span>
                   <span className="text-xl font-extrabold text-nauma-600">{totalGeneral.toFixed(2)} MAD</span>
                 </div>
-                <p className="text-xs text-gray-400 mt-1">Prix indicatifs — confirmés à la commande</p>
+                <p className="text-xs text-gray-400 mt-1">{t("cart.totalNote")}</p>
               </div>
             )}
 
             {!hasAnyPrice && (
               <div className="border-t border-gray-100 pt-4 mb-5">
-                <p className="text-xs text-gray-400">Les prix seront confirmés après votre demande.</p>
+                <p className="text-xs text-gray-400">{t("cart.priceNote")}</p>
               </div>
             )}
 
@@ -170,7 +174,7 @@ export default function PanierPage() {
               href="/commande"
               className="flex items-center justify-center gap-2 w-full bg-nauma-600 hover:bg-nauma-700 text-white font-bold py-3.5 rounded-full uppercase tracking-wider text-sm transition-colors"
             >
-              Soumettre votre demande de devis
+              {t("cart.order")}
               <ChevronRight className="w-4 h-4" />
             </Link>
           </div>

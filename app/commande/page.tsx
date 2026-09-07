@@ -7,6 +7,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft, ShoppingCart } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface FormData {
   nom: string;
@@ -20,6 +21,7 @@ interface FormData {
 export default function CommandePage() {
   const { items, totalItems, clear } = useCart();
   const router = useRouter();
+  const { t } = useLanguage();
 
   const [form, setForm] = useState<FormData>({
     nom: "", entreprise: "", telephone: "", email: "", adresse: "", message: "",
@@ -32,11 +34,11 @@ export default function CommandePage() {
     return (
       <div className="container-main py-24 text-center">
         <ShoppingCart className="w-16 h-16 text-gray-200 mx-auto mb-5" />
-        <h1 className="text-xl font-bold text-gray-700 mb-2">Votre panier est vide</h1>
-        <p className="text-gray-400 text-sm mb-8">Ajoutez des produits avant de passer une demande.</p>
+        <h1 className="text-xl font-bold text-gray-700 mb-2">{t("cmd.empty")}</h1>
+        <p className="text-gray-400 text-sm mb-8">{t("cmd.addFirst")}</p>
         <Link href="/catalogue" className="inline-flex items-center gap-2 bg-nauma-600 text-white font-bold px-8 py-3 rounded-full hover:bg-nauma-700 transition-colors">
           <ArrowLeft className="w-4 h-4" />
-          Voir le catalogue
+          {t("pdp.seeCatalogue")}
         </Link>
       </div>
     );
@@ -44,10 +46,10 @@ export default function CommandePage() {
 
   const validate = () => {
     const e: Partial<FormData> = {};
-    if (!form.nom.trim())       e.nom       = "Champ obligatoire";
-    if (!form.telephone.trim()) e.telephone = "Champ obligatoire";
-    if (!form.email.trim())     e.email     = "Champ obligatoire";
-    if (!form.adresse.trim())   e.adresse   = "Champ obligatoire";
+    if (!form.nom.trim())       e.nom       = t("cmd.required");
+    if (!form.telephone.trim()) e.telephone = t("cmd.required");
+    if (!form.email.trim())     e.email     = t("cmd.required");
+    if (!form.adresse.trim())   e.adresse   = t("cmd.required");
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -101,22 +103,22 @@ export default function CommandePage() {
       <nav className="flex items-center gap-2 text-sm text-gray-400 mb-8">
         <Link href="/panier" className="hover:text-nauma-600 flex items-center gap-1 transition-colors">
           <ArrowLeft className="w-4 h-4" />
-          Retour au panier
+          {t("cmd.back")}
         </Link>
         <span>/</span>
-        <span className="text-gray-700 font-medium">Détails de la demande</span>
+        <span className="text-gray-700 font-medium">{t("cmd.details")}</span>
       </nav>
 
       <div className="grid lg:grid-cols-5 gap-10 items-start">
 
         {/* ── Formulaire ── */}
         <div className="lg:col-span-3 space-y-5">
-          <h1 className="text-2xl font-bold text-gray-800">Détails de facturation</h1>
+          <h1 className="text-2xl font-bold text-gray-800">{t("cmd.billing")}</h1>
 
           {/* Nom */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">
-              Nom Complet <span className="text-red-500">*</span>
+              {t("cmd.nom")} <span className="text-red-500">*</span>
             </label>
             <input
               {...field("nom")}
@@ -130,7 +132,7 @@ export default function CommandePage() {
           {/* Entreprise */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">
-              Entreprise <span className="text-gray-400 text-xs">(facultatif)</span>
+              {t("cmd.entreprise")} <span className="text-gray-400 text-xs">{t("cmd.optional")}</span>
             </label>
             <input
               {...field("entreprise")}
@@ -143,7 +145,7 @@ export default function CommandePage() {
           {/* Téléphone */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">
-              Téléphone <span className="text-red-500">*</span>
+              {t("cmd.tel")} <span className="text-red-500">*</span>
             </label>
             <input
               {...field("telephone")}
@@ -157,7 +159,7 @@ export default function CommandePage() {
           {/* E-mail */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">
-              E-mail <span className="text-red-500">*</span>
+              {t("cmd.email")} <span className="text-red-500">*</span>
             </label>
             <input
               {...field("email")}
@@ -171,7 +173,7 @@ export default function CommandePage() {
           {/* Adresse */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">
-              Adresse <span className="text-red-500">*</span>
+              {t("cmd.adresse")} <span className="text-red-500">*</span>
             </label>
             <input
               {...field("adresse")}
@@ -185,7 +187,7 @@ export default function CommandePage() {
           {/* Message optionnel */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">
-              Message <span className="text-gray-400 text-xs">(facultatif)</span>
+              {t("cmd.message")} <span className="text-gray-400 text-xs">{t("cmd.optional")}</span>
             </label>
             <textarea
               {...field("message")}
@@ -200,7 +202,7 @@ export default function CommandePage() {
         <div className="lg:col-span-2">
           <div className="bg-white border border-gray-100 p-6 sticky top-32">
             <h2 className="text-base font-bold text-gray-800 mb-4 pb-3 border-b border-gray-100">
-              Votre commande
+              {t("cmd.order")}
             </h2>
 
             <div className="space-y-4 mb-6">
@@ -225,7 +227,7 @@ export default function CommandePage() {
                         <p className="text-xs text-nauma-teal mt-0.5">{item.variante}</p>
                       )}
                       {item.colis && (
-                        <p className="text-xs text-gray-400">{item.quantite} colis · {item.quantite * item.colis} unités</p>
+                        <p className="text-xs text-gray-400">{item.quantite} {t("cmd.colis")} · {item.quantite * item.colis} {t("cmd.unites")}</p>
                       )}
                     </div>
                   </div>
@@ -234,18 +236,16 @@ export default function CommandePage() {
             </div>
 
             <div className="border-t border-gray-100 pt-4 mb-5">
-              <p className="text-xs text-gray-400 leading-relaxed">
-                Les prix seront confirmés par notre équipe après réception de votre demande.
-              </p>
+              <p className="text-xs text-gray-400 leading-relaxed">{t("cmd.priceNote")}</p>
             </div>
 
             <button
               onClick={handleSubmit}
               className="w-full bg-nauma-600 hover:bg-nauma-700 text-white font-bold py-4 rounded-full uppercase tracking-wider text-sm transition-colors"
             >
-              Valider votre demande de devis
+              {t("cmd.submit")}
             </button>
-            <p className="text-center text-xs text-gray-400 mt-3">Vous serez redirigé vers WhatsApp</p>
+            <p className="text-center text-xs text-gray-400 mt-3">{t("cmd.waNote")}</p>
           </div>
         </div>
 

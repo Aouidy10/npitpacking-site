@@ -13,6 +13,7 @@ import { db } from "@/lib/firebase";
 import { useCart } from "@/context/CartContext";
 import { buildCartId } from "@/lib/cart";
 import ProductCard from "@/components/ProductCard";
+import { useLanguage } from "@/context/LanguageContext";
 import clsx from "clsx";
 
 export default function ProduitDetail({ slug }: { slug: string }) {
@@ -28,6 +29,7 @@ export default function ProduitDetail({ slug }: { slug: string }) {
   const [added, setAdded]             = useState(false);
   const [similaires, setSimilaires]   = useState<Produit[]>([]);
   const { add: addToCart }            = useCart();
+  const { t }                         = useLanguage();
 
   useEffect(() => {
     if (produit) return;
@@ -79,16 +81,16 @@ export default function ProduitDetail({ slug }: { slug: string }) {
   }, [lightbox]);
 
   if (loading) {
-    return <div className="container-main py-24 text-center text-gray-400">Chargement…</div>;
+    return <div className="container-main py-24 text-center text-gray-400">{t("pdp.loading")}</div>;
   }
 
   if (!produit) {
     return (
       <div className="container-main py-24 text-center">
         <Package className="w-12 h-12 text-gray-200 mx-auto mb-4" />
-        <h1 className="text-xl font-bold text-gray-700 mb-2">Produit introuvable</h1>
-        <p className="text-gray-400 text-sm mb-6">Ce produit n&apos;existe pas ou a été supprimé.</p>
-        <Link href="/catalogue" className="btn-primary">Voir le catalogue</Link>
+        <h1 className="text-xl font-bold text-gray-700 mb-2">{t("pdp.notFound")}</h1>
+        <p className="text-gray-400 text-sm mb-6">{t("pdp.notFoundDesc")}</p>
+        <Link href="/catalogue" className="btn-primary">{t("pdp.seeCatalogue")}</Link>
       </div>
     );
   }
@@ -173,9 +175,9 @@ export default function ProduitDetail({ slug }: { slug: string }) {
       <div className="border-b border-gray-100 bg-white">
         <div className="container-main py-3">
           <nav className="flex items-center gap-1.5 text-xs text-gray-400 flex-wrap">
-            <Link href="/" className="hover:text-nauma-600 transition-colors">Accueil</Link>
+            <Link href="/" className="hover:text-nauma-600 transition-colors">{t("nav.home")}</Link>
             <span>/</span>
-            <Link href="/catalogue" className="hover:text-nauma-600 transition-colors">Catalogue</Link>
+            <Link href="/catalogue" className="hover:text-nauma-600 transition-colors">{t("nav.catalogue")}</Link>
             <span>/</span>
             <Link href={`/catalogue?cat=${produit.categorie}`} className="hover:text-nauma-600 transition-colors">
               {catLabel}
@@ -231,9 +233,9 @@ export default function ProduitDetail({ slug }: { slug: string }) {
                   produit.badge === "promo"      && "bg-red-500",
                   produit.badge === "bestseller" && "bg-nauma-gold",
                 )}>
-                  {produit.badge === "nouveau"    && "Nouveau"}
-                  {produit.badge === "promo"      && "Promo"}
-                  {produit.badge === "bestseller" && "Top vente"}
+                  {produit.badge === "nouveau"    && t("pdp.badge.new")}
+                  {produit.badge === "promo"      && t("pdp.badge.promo")}
+                  {produit.badge === "bestseller" && t("pdp.badge.best")}
                 </span>
               )}
 
@@ -314,7 +316,7 @@ export default function ProduitDetail({ slug }: { slug: string }) {
             {/* Info colis (sans prix) */}
             {colisCount > 0 && (
               <p className="text-xs text-amber-700 bg-amber-50 border border-amber-100 rounded-full px-3 py-1.5 w-fit">
-                Vendu par colis de {colisCount} unités — minimum 1 colis
+                {t("pdp.soldByBox")} {colisCount} {t("pdp.unitMin")}
               </p>
             )}
 
@@ -389,9 +391,9 @@ export default function ProduitDetail({ slug }: { slug: string }) {
                 )}
               >
                 {added ? (
-                  <><Check className="w-4 h-4" /> Ajouté au panier !</>
+                  <><Check className="w-4 h-4" /> {t("pdp.added")}</>
                 ) : (
-                  <><ShoppingCart className="w-4 h-4" /> Ajouter au devis</>
+                  <><ShoppingCart className="w-4 h-4" /> {t("pdp.addToCart")}</>
                 )}
               </button>
             </div>
@@ -400,7 +402,7 @@ export default function ProduitDetail({ slug }: { slug: string }) {
             <div className="flex items-center gap-4">
               <Link href="/panier" className="flex items-center gap-2 text-nauma-600 hover:text-nauma-700 text-sm font-semibold transition-colors">
                 <ShoppingCart className="w-4 h-4" />
-                Voir le panier
+                {t("pdp.viewCart")}
               </Link>
               <a
                 href={whatsappUrl}
@@ -409,29 +411,29 @@ export default function ProduitDetail({ slug }: { slug: string }) {
                 className="flex items-center gap-2 text-green-600 hover:text-green-700 text-sm font-medium transition-colors"
               >
                 <MessageCircle className="w-4 h-4" />
-                Commander par WhatsApp
+                {t("pdp.orderWA")}
               </a>
             </div>
 
             {/* ── Métadonnées ─── */}
             <div className="border-t border-gray-100 pt-5 space-y-2 text-sm text-gray-500">
               {produit.id && (
-                <p><span className="font-medium text-gray-700">UGS :</span> {produit.id.toUpperCase().slice(0, 8)}</p>
+                <p><span className="font-medium text-gray-700">{t("pdp.ugs")} :</span> {produit.id.toUpperCase().slice(0, 8)}</p>
               )}
               <p>
-                <span className="font-medium text-gray-700">Catégorie :</span>{" "}
+                <span className="font-medium text-gray-700">{t("pdp.category")} :</span>{" "}
                 <Link href={`/catalogue?cat=${produit.categorie}`} className="text-nauma-600 hover:underline">
                   {catLabel}
                 </Link>
               </p>
               {produit.poids && (
-                <p><span className="font-medium text-gray-700">Poids :</span> {produit.poids}</p>
+                <p><span className="font-medium text-gray-700">{t("pdp.weight")} :</span> {produit.poids}</p>
               )}
               {(produit.colis ?? 0) > 0 && (
-                <p><span className="font-medium text-gray-700">Conditionnement :</span> {produit.colis} unités / colis</p>
+                <p><span className="font-medium text-gray-700">{t("pdp.packaging")} :</span> {produit.colis} {t("pdp.unitsPerBox")}</p>
               )}
               {produit.unite && (
-                <p><span className="font-medium text-gray-700">Unité :</span> {produit.unite}</p>
+                <p><span className="font-medium text-gray-700">{t("pdp.unit")} :</span> {produit.unite}</p>
               )}
             </div>
 
@@ -445,14 +447,14 @@ export default function ProduitDetail({ slug }: { slug: string }) {
           <div className="container-main py-10 pb-28 md:pb-10">
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h2 className="text-lg font-bold text-gray-800">Produits similaires</h2>
+                <h2 className="text-lg font-bold text-gray-800">{t("pdp.similar")}</h2>
                 <div className="w-10 h-0.5 bg-nauma-600 mt-1" />
               </div>
               <Link
                 href={`/catalogue?cat=${produit.categorie}`}
                 className="text-xs text-nauma-600 hover:underline font-medium"
               >
-                Voir toute la catégorie →
+                {t("pdp.seeCategory")}
               </Link>
             </div>
 
@@ -558,7 +560,7 @@ export default function ProduitDetail({ slug }: { slug: string }) {
               added ? "bg-green-500 text-white" : "bg-nauma-600 text-white"
             )}
           >
-            {added ? <><Check className="w-4 h-4" /> Ajouté !</> : <><ShoppingCart className="w-4 h-4" /> Ajouter au devis</>}
+            {added ? <><Check className="w-4 h-4" /> {t("pdp.addedShort")}</> : <><ShoppingCart className="w-4 h-4" /> {t("pdp.addToCart")}</>}
           </button>
         </div>
       </div>

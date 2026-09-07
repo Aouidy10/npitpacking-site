@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { CheckCircle, Loader2 } from "lucide-react";
+import { useLanguage } from "@/context/LanguageContext";
 
 const PRODUITS_OPTIONS = [
   "Cellophane transparent",
@@ -23,6 +24,7 @@ const VILLES = [
 type FormState = "idle" | "loading" | "success" | "error";
 
 export default function DevisPage() {
+  const { t } = useLanguage();
   const [form, setForm] = useState({
     nom: "",
     telephone: "",
@@ -58,15 +60,13 @@ export default function DevisPage() {
     return (
       <div className="container-main py-20 flex flex-col items-center text-center gap-4">
         <CheckCircle className="w-16 h-16 text-emerald-500" />
-        <h2 className="text-2xl font-bold text-gray-800">Demande envoyée !</h2>
-        <p className="text-gray-500 max-w-sm">
-          On vous contactera dans les plus brefs délais via WhatsApp ou téléphone pour confirmer votre commande.
-        </p>
+        <h2 className="text-2xl font-bold text-gray-800">{t("devis.success.title")}</h2>
+        <p className="text-gray-500 max-w-sm">{t("devis.success.desc")}</p>
         <button
           onClick={() => setState("idle")}
           className="mt-4 btn-primary"
         >
-          Nouvelle demande
+          {t("devis.newRequest")}
         </button>
       </div>
     );
@@ -74,15 +74,13 @@ export default function DevisPage() {
 
   return (
     <div className="container-main py-10 max-w-2xl">
-      <h1 className="section-title mb-2">Commande Gros — Devis</h1>
-      <p className="text-gray-500 mb-8">
-        Remplissez ce formulaire pour recevoir un prix spécial gros. Réponse rapide garantie.
-      </p>
+      <h1 className="section-title mb-2">{t("devis.title")}</h1>
+      <p className="text-gray-500 mb-8">{t("devis.sub")}</p>
 
       <form onSubmit={handleSubmit} className="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-gray-100 space-y-5">
         <div className="grid md:grid-cols-2 gap-5">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Nom complet *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t("devis.nom")}</label>
             <input
               type="text"
               name="nom"
@@ -94,7 +92,7 @@ export default function DevisPage() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Téléphone *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t("devis.tel")}</label>
             <input
               type="tel"
               name="telephone"
@@ -108,7 +106,7 @@ export default function DevisPage() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Ville *</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">{t("devis.ville")}</label>
           <select
             name="ville"
             required
@@ -116,14 +114,14 @@ export default function DevisPage() {
             onChange={handleChange}
             className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-emerald-400 transition-colors bg-white"
           >
-            <option value="">Sélectionner votre ville</option>
+            <option value="">{t("devis.selectVille")}</option>
             {VILLES.map((v) => <option key={v} value={v}>{v}</option>)}
           </select>
         </div>
 
         <div className="grid md:grid-cols-2 gap-5">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Produit souhaité *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t("devis.produit")}</label>
             <select
               name="produit"
               required
@@ -131,12 +129,12 @@ export default function DevisPage() {
               onChange={handleChange}
               className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-emerald-400 transition-colors bg-white"
             >
-              <option value="">Choisir un produit</option>
+              <option value="">{t("devis.selectProduit")}</option>
               {PRODUITS_OPTIONS.map((p) => <option key={p} value={p}>{p}</option>)}
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Quantité estimée *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t("devis.quantite")}</label>
             <input
               type="number"
               name="quantite"
@@ -151,20 +149,20 @@ export default function DevisPage() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Message / précisions (optionnel)</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">{t("devis.message")}</label>
           <textarea
             name="message"
             value={form.message}
             onChange={handleChange}
             rows={3}
-            placeholder="Taille spécifique, couleur, délai de livraison..."
+            placeholder={t("devis.msgPlaceholder")}
             className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-emerald-400 transition-colors resize-none"
           />
         </div>
 
         {state === "error" && (
           <p className="text-red-500 text-sm bg-red-50 border border-red-200 px-4 py-3 rounded-xl">
-            Une erreur s&apos;est produite. Veuillez réessayer ou nous contacter via WhatsApp.
+            {t("devis.error")}
           </p>
         )}
 
@@ -174,15 +172,13 @@ export default function DevisPage() {
           className="w-full btn-primary flex items-center justify-center gap-2 disabled:opacity-60"
         >
           {state === "loading" ? (
-            <><Loader2 className="w-4 h-4 animate-spin" /> Envoi en cours...</>
+            <><Loader2 className="w-4 h-4 animate-spin" /> {t("devis.sending")}</>
           ) : (
-            "Envoyer ma demande de devis"
+            t("devis.submit")
           )}
         </button>
 
-        <p className="text-xs text-gray-400 text-center">
-          En soumettant ce formulaire, vous acceptez d&apos;être contacté par téléphone ou WhatsApp.
-        </p>
+        <p className="text-xs text-gray-400 text-center">{t("devis.consent")}</p>
       </form>
     </div>
   );

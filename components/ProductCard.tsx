@@ -81,7 +81,7 @@ export default function ProductCard({ produit }: { produit: Produit }) {
               : "bg-gray-100 text-gray-400 pointer-events-none"
           )}
         >
-          {hasVariants ? "Choix des options" : "Ajouter au devis"}
+          {hasVariants ? t("card.options") : t("card.addToCart")}
         </Link>
       </div>
     </div>
