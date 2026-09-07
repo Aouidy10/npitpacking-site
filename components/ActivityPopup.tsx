@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { X } from "lucide-react";
 import { ACTIVITES } from "@/lib/activites";
 
 export default function ActivityPopup() {
@@ -18,9 +19,7 @@ export default function ActivityPopup() {
     router.push(`/catalogue?activite=${id}`);
   };
 
-  const skip = () => {
-    setVisible(false);
-  };
+  const skip = () => setVisible(false);
 
   if (!visible) return null;
 
@@ -32,62 +31,62 @@ export default function ActivityPopup() {
         onClick={skip}
       />
 
-      {/* Popup */}
-      <div className="fixed inset-0 z-[151] flex items-center justify-center px-4 py-6">
-        <div className="bg-white rounded-3xl shadow-2xl w-full max-w-[520px] overflow-hidden animate-slide-up">
+      {/* Card */}
+      <div className="fixed inset-0 z-[151] flex items-center justify-center p-4">
+        <div className="bg-white rounded-2xl shadow-2xl w-full max-w-[460px] overflow-hidden animate-slide-up">
 
-          {/* Header navy */}
-          <div className="relative bg-nauma-600 px-7 pt-7 pb-6 text-white text-center overflow-hidden">
-            {/* Cercles déco */}
-            <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-white/5 pointer-events-none" />
-            <div className="absolute -bottom-6 -left-6 w-24 h-24 rounded-full bg-white/5 pointer-events-none" />
+          {/* Barre accent */}
+          <div className="h-1 w-full bg-gradient-to-r from-[#1B3266] via-[#3DAAB5] to-[#C8A46E]" />
 
-            <div className="relative">
-              <div className="inline-flex items-center gap-2 bg-white/10 rounded-full px-3 py-1 mb-4">
-                <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-                <span className="text-xs font-semibold text-white/80 tracking-wide">NPIT Packing — Maroc</span>
+          {/* Header */}
+          <div className="px-6 pt-5 pb-3 flex items-start justify-between">
+            <div>
+              <div className="flex items-center gap-1.5 mb-2">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-[#3DAAB5]">NPIT Packing</span>
+                <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+                <span className="text-[10px] text-gray-400">En ligne</span>
               </div>
-              <h2 className="text-2xl font-extrabold leading-tight mb-1.5">
-                Quel est votre secteur d&apos;activité ?
+              <h2 className="text-lg font-extrabold text-gray-900 leading-tight">
+                Votre secteur d&apos;activité ?
               </h2>
-              <p className="text-blue-200 text-sm">
-                Nous sélectionnons les emballages idéaux pour votre métier
+              <p className="text-xs text-gray-400 mt-0.5">
+                On sélectionne les emballages faits pour vous
               </p>
             </div>
+            <button
+              onClick={skip}
+              className="text-gray-300 hover:text-gray-500 transition-colors mt-0.5 flex-shrink-0"
+            >
+              <X className="w-4 h-4" />
+            </button>
           </div>
 
-          {/* Grille des activités */}
-          <div className="px-5 py-5">
-            <div className="flex flex-wrap justify-center gap-3">
-              {ACTIVITES.map((act) => (
-                <button
-                  key={act.id}
-                  onClick={() => select(act.id)}
-                  className={`
-                    flex flex-col items-center gap-2 p-4 rounded-2xl border-2
-                    transition-all duration-150 w-[calc(50%-6px)] sm:w-[130px]
-                    ${act.couleur}
-                    hover:scale-[1.03] hover:shadow-md active:scale-100
-                  `}
-                >
-                  <div className={`w-14 h-14 rounded-2xl ${act.emojisBg} flex items-center justify-center text-3xl`}>
-                    {act.emoji}
-                  </div>
-                  <span className="text-sm font-bold text-gray-700 text-center leading-tight">
-                    {act.label}
-                  </span>
-                </button>
-              ))}
-            </div>
+          {/* Grille activités */}
+          <div className="px-5 pb-4 flex flex-wrap justify-center gap-2">
+            {ACTIVITES.map((act) => (
+              <button
+                key={act.id}
+                onClick={() => select(act.id)}
+                style={{ width: "calc(25% - 6px)", minWidth: "90px" }}
+                className="flex flex-col items-center gap-1.5 py-3 px-2 rounded-xl border border-gray-100 hover:border-[#1B3266] hover:bg-[#1B3266]/5 transition-all duration-150 group active:scale-95"
+              >
+                <div className="w-10 h-10 rounded-xl bg-gray-50 group-hover:bg-[#1B3266]/8 flex items-center justify-center text-xl transition-colors">
+                  {act.emoji}
+                </div>
+                <span className="text-[10px] font-semibold text-gray-600 group-hover:text-[#1B3266] text-center leading-tight transition-colors">
+                  {act.label}
+                </span>
+              </button>
+            ))}
           </div>
 
           {/* Footer */}
-          <div className="pb-5 text-center border-t border-gray-100 pt-4 mx-5">
+          <div className="border-t border-gray-50 py-3 text-center">
             <button
               onClick={skip}
-              className="text-xs text-gray-400 hover:text-gray-600 transition-colors underline underline-offset-2"
+              className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
             >
-              Voir tous les produits sans filtre
+              Voir tous les produits sans filtre →
             </button>
           </div>
 

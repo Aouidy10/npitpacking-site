@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { ACTIVITES } from "@/lib/activites";
 
 export const metadata: Metadata = {
   title: "Emballages Professionnels au Maroc — Détail & Gros",
@@ -76,6 +77,11 @@ export default function HomePage() {
             <div className="w-12 h-0.5 bg-nauma-600 mx-auto mt-2" />
           </div>
 
+          {/* ── Par Familles ── */}
+          <div className="flex items-center gap-3 mb-4">
+            <span className="text-xs font-bold uppercase tracking-widest text-nauma-600">Par Familles</span>
+            <div className="flex-1 h-px bg-gray-100" />
+          </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
             {CATEGORIES_CONFIG.map((cat) => {
               const Icon = CAT_ICONS[cat.slug];
@@ -131,6 +137,30 @@ export default function HomePage() {
                 </div>
               );
             })}
+          </div>
+
+          {/* ── Par Métiers ── */}
+          <div className="flex items-center gap-3 mt-8 mb-4">
+            <span className="text-xs font-bold uppercase tracking-widest text-nauma-teal">Par Métiers</span>
+            <div className="flex-1 h-px bg-gray-100" />
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
+            {ACTIVITES.map((act) => (
+              <Link
+                key={act.id}
+                href={`/catalogue?activite=${act.id}`}
+                className="flex flex-col items-center gap-2 p-4 border border-gray-100 bg-white hover:border-nauma-teal hover:shadow-md transition-all duration-200 text-center group"
+              >
+                <div className="w-12 h-12 flex items-center justify-center rounded-full bg-gray-50 group-hover:bg-nauma-teal/10 text-2xl transition-colors">
+                  {act.emoji}
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-gray-700 leading-tight group-hover:text-nauma-600 transition-colors">
+                    {act.label}
+                  </p>
+                </div>
+              </Link>
+            ))}
           </div>
         </div>
       </section>
