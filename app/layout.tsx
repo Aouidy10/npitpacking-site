@@ -4,11 +4,8 @@ import AnnouncementBar from "@/components/AnnouncementBar";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import FloatingWhatsApp from "@/components/FloatingWhatsApp";
-import dynamic from "next/dynamic";
 import { CartProvider } from "@/context/CartContext";
 import { LanguageProvider } from "@/context/LanguageContext";
-
-const ActivityPopup = dynamic(() => import("@/components/ActivityPopup"), { ssr: false });
 
 const JSON_LD = {
   "@context": "https://schema.org",
@@ -108,7 +105,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <main className="min-h-screen">{children}</main>
             <Footer />
             <FloatingWhatsApp />
-            <ActivityPopup />
           </CartProvider>
         </LanguageProvider>
       </body>
