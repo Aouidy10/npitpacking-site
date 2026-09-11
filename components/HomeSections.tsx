@@ -2,11 +2,12 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { collection, getDocs, query, where } from "firebase/firestore";
+import { collection, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { Produit } from "@/types";
 import ProductCard from "@/components/ProductCard";
 import { getCloudinaryUrl } from "@/lib/cloudinary";
+import { useLanguage } from "@/context/LanguageContext";
 
 const PLACEHOLDER_BY_CAT: Record<string, string> = {
   "hygiene":                 "/placeholder-hygiene.svg",
@@ -21,6 +22,7 @@ export default function HomeSections() {
   const [nouveaux,    setNouveaux]    = useState<Produit[]>([]);
   const [bestsellers, setBestsellers] = useState<Produit[]>([]);
   const [loaded, setLoaded] = useState(false);
+  const { t } = useLanguage();
 
   useEffect(() => {
     (async () => {
@@ -45,10 +47,8 @@ export default function HomeSections() {
       {nouveaux.length > 0 && (
         <section className="container-main pb-14">
           <div className="text-center mb-10">
-            <h2 className="section-title">
-              Découvrez <span className="text-nauma-teal italic">nos nouveautés</span>
-            </h2>
-            <p className="text-gray-500 text-sm mt-2">Nos dernières références — qualité professionnelle</p>
+            <h2 className="section-title">{t("home.newTitle")}</h2>
+            <p className="text-gray-500 text-sm mt-2">{t("home.newSub")}</p>
           </div>
 
           {/* 2 grandes cartes */}
@@ -68,7 +68,7 @@ export default function HomeSections() {
                     />
                   )}
                   <span className="relative inline-flex items-center gap-1 bg-nauma-teal text-white text-xs font-black px-3 py-1 rounded-full w-fit mb-3 tracking-widest uppercase">
-                    ✦ NEW
+                    ✦ {t("home.new")}
                   </span>
                   <div className="relative">
                     <h3 className="text-xl font-bold text-nauma-600 leading-tight group-hover:text-nauma-teal transition-colors">
@@ -78,7 +78,7 @@ export default function HomeSections() {
                   </div>
                   <div className="relative flex items-center justify-end mt-4">
                     <span className="text-xs font-semibold text-nauma-teal bg-white border border-nauma-teal px-3 py-1.5 rounded-full group-hover:bg-nauma-teal group-hover:text-white transition-colors">
-                      Voir le produit →
+                      {t("home.seeProduct")}
                     </span>
                   </div>
                   <div className="absolute -right-8 -bottom-8 w-40 h-40 rounded-full bg-nauma-teal/10 group-hover:bg-nauma-teal/20 transition-colors pointer-events-none" />
@@ -107,7 +107,7 @@ export default function HomeSections() {
                   <div className="flex-1 min-w-0">
                     <h3 className="font-bold text-sm text-gray-800 group-hover:text-nauma-teal transition-colors truncate">{p.nom}</h3>
                     <p className="text-xs text-gray-400 mt-0.5 truncate capitalize">{p.sousCategorie?.replace(/-/g, " ")}</p>
-                    <p className="text-xs text-nauma-teal font-medium mt-1">Voir le produit →</p>
+                    <p className="text-xs text-nauma-teal font-medium mt-1">{t("home.seeProduct")}</p>
                   </div>
                   <span className="text-nauma-teal text-xs font-bold flex-shrink-0">→</span>
                 </Link>
@@ -120,7 +120,7 @@ export default function HomeSections() {
               href="/catalogue"
               className="inline-flex items-center gap-2 border-2 border-nauma-teal text-nauma-teal hover:bg-nauma-teal hover:text-white font-semibold px-6 py-2.5 rounded-xl transition-all text-sm"
             >
-              Voir toutes les nouveautés →
+              {t("home.newSeeAll")}
             </Link>
           </div>
         </section>
@@ -131,11 +131,11 @@ export default function HomeSections() {
         <section className="container-main pb-14">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h2 className="section-title">⭐ Nos Best-Sellers</h2>
-              <p className="text-gray-400 text-sm mt-1">Les produits les plus commandés par nos clients</p>
+              <h2 className="section-title">⭐ {t("home.bestsellers")}</h2>
+              <p className="text-gray-400 text-sm mt-1">{t("home.bestsellersSub")}</p>
             </div>
             <Link href="/catalogue" className="text-nauma-600 hover:text-nauma-700 text-sm font-medium hidden md:block">
-              Voir tout →
+              {t("nav.seeAll")} →
             </Link>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

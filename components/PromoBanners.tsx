@@ -1,34 +1,7 @@
-import Link from "next/link";
+"use client";
 
-const BANNERS = [
-  {
-    tag:   "Nouveauté",
-    titre: "Des emballages pour vos besoins et ceux de la planète.",
-    cta:   "Découvrir",
-    href:  "/catalogue?cat=emballage-biodegradable",
-    bg:    "#7a6448",
-    accent:"#c4a96b",
-    deco:  "eco",
-  },
-  {
-    tag:   "Best-seller",
-    titre: "Un emballage aussi frais que votre produit !",
-    cta:   "Voir le catalogue",
-    href:  "/catalogue?cat=emballage-alimentaire",
-    bg:    "#2d7e8a",
-    accent:"#4db8c8",
-    deco:  "cup",
-  },
-  {
-    tag:   "Gros & Détail",
-    titre: "Une qualité digne de confiance.",
-    cta:   "Demander un devis",
-    href:  "/devis",
-    bg:    "#b06050",
-    accent:"#d4907e",
-    deco:  "box",
-  },
-];
+import Link from "next/link";
+import { useLanguage } from "@/context/LanguageContext";
 
 /* Formes décoratives SVG par carte */
 function Deco({ type, accent }: { type: string; accent: string }) {
@@ -63,6 +36,38 @@ function Deco({ type, accent }: { type: string; accent: string }) {
 }
 
 export default function PromoBanners() {
+  const { t } = useLanguage();
+
+  const BANNERS = [
+    {
+      tag:   t("promo.tag.new"),
+      titre: t("promo.eco.title"),
+      cta:   t("promo.discover"),
+      href:  "/catalogue?cat=emballage-biodegradable",
+      bg:    "#7a6448",
+      accent:"#c4a96b",
+      deco:  "eco",
+    },
+    {
+      tag:   t("promo.tag.best"),
+      titre: t("promo.fresh.title"),
+      cta:   t("promo.seeCatalogue"),
+      href:  "/catalogue?cat=emballage-alimentaire",
+      bg:    "#2d7e8a",
+      accent:"#4db8c8",
+      deco:  "cup",
+    },
+    {
+      tag:   t("promo.tag.wholesale"),
+      titre: t("promo.quality.title"),
+      cta:   t("promo.askQuote"),
+      href:  "/devis",
+      bg:    "#b06050",
+      accent:"#d4907e",
+      deco:  "box",
+    },
+  ];
+
   return (
     <section className="bg-white border-b border-gray-100">
       <div className="container-main py-8">
