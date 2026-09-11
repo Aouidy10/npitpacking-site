@@ -66,8 +66,8 @@ export default function HeroSlider() {
             alt=""
             width={420}
             height={420}
-            className="object-contain opacity-20"
-            style={{ mixBlendMode: "screen", filter: "brightness(3) contrast(0.6)" }}
+            className="object-contain opacity-30"
+            style={{ mixBlendMode: "screen", filter: "invert(1) brightness(2)" }}
           />
         </div>
 
