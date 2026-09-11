@@ -60,8 +60,15 @@ export default function HeroSlider() {
         style={{ background: s.bg, opacity: animating ? 0 : 1 }}
       >
         {/* Logo déco flottant */}
-        <div className="absolute right-0 top-0 bottom-0 w-1/2 flex items-center justify-center opacity-10 pointer-events-none select-none">
-          <Image src="/logo-npit.png" alt="" width={420} height={420} className="object-contain" />
+        <div className="absolute right-0 top-0 bottom-0 w-1/2 flex items-center justify-center pointer-events-none select-none">
+          <Image
+            src="/logo-npit.png"
+            alt=""
+            width={420}
+            height={420}
+            className="object-contain opacity-20"
+            style={{ mixBlendMode: "screen", filter: "brightness(3) contrast(0.6)" }}
+          />
         </div>
 
         <div className="container-main relative z-10 text-white">
