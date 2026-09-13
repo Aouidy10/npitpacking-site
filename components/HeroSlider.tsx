@@ -89,6 +89,28 @@ const SLIDES = [
     bg: "linear-gradient(120deg,#1a1205 0%,#2a1e0a 50%,#1B3266 100%)",
   },
   {
+    title: "PAILLES",
+    subtitle: "Le petit détail qui compte.",
+    bullets: [
+      "Pailles standards, articulées, emballées ou grand diamètre : des références adaptées aux différents usages professionnels.",
+    ],
+    cta: "Découvrir la gamme",
+    href: "/catalogue?cat=plastique",
+    accent: "#3DAAB5",
+    bg: "linear-gradient(120deg,#0a2030 0%,#1B3266 100%)",
+  },
+  {
+    title: "COUVERTS",
+    subtitle: "Pratiques pour servir, adaptés à votre activité.",
+    bullets: [
+      "Couteaux, fourchettes, cuillères et kits de couverts pour accompagner vos services sur place ou à emporter.",
+    ],
+    cta: "Découvrir la gamme",
+    href: "/catalogue?cat=plastique",
+    accent: "#C8A46E",
+    bg: "linear-gradient(120deg,#1a0f05 0%,#2a1a08 50%,#1B3266 100%)",
+  },
+  {
     title: "Des emballages pour tous vos besoins",
     sub: "Papier hygiène · Film alimentaire · Barquettes · Gobelets",
     cta: "Voir le catalogue",
