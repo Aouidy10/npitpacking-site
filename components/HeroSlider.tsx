@@ -65,6 +65,30 @@ const SLIDES = [
     bg: "linear-gradient(120deg,#0a1f2e 0%,#1a4a5a 100%)",
   },
   {
+    title: "GOBELETS",
+    subtitle: "Servir simplement, avec la bonne référence.",
+    bullets: [
+      "Gobelets papier et plastique adaptés aux cafés, snacks, restaurants, pâtisseries et activités de livraison.",
+      "Formats et usages différents : nous vous aidons à identifier la solution adaptée à votre consommation.",
+    ],
+    cta: "Découvrir la gamme",
+    href: "/catalogue?cat=plastique",
+    accent: "#3DAAB5",
+    bg: "linear-gradient(120deg,#0d1f35 0%,#1B3266 100%)",
+  },
+  {
+    title: "SACHETS & SACS",
+    subtitle: "Transporter votre produit, c'est aussi protéger votre image.",
+    bullets: [
+      "Sachets, sacs et solutions de transport adaptés aux besoins des professionnels.",
+      "Du service au comptoir à la livraison, choisissez le format adapté à votre activité.",
+    ],
+    cta: "Découvrir la gamme",
+    href: "/catalogue?cat=plastique",
+    accent: "#C8A46E",
+    bg: "linear-gradient(120deg,#1a1205 0%,#2a1e0a 50%,#1B3266 100%)",
+  },
+  {
     title: "Des emballages pour tous vos besoins",
     sub: "Papier hygiène · Film alimentaire · Barquettes · Gobelets",
     cta: "Voir le catalogue",
