@@ -111,6 +111,28 @@ const SLIDES = [
     bg: "linear-gradient(120deg,#1a0f05 0%,#2a1a08 50%,#1B3266 100%)",
   },
   {
+    title: "HYGIÈNE",
+    subtitle: "Parce que l'hygiène ne laisse aucune place à l'improvisation.",
+    bullets: [
+      "Gants et consommables d'hygiène destinés aux professionnels qui recherchent des produits adaptés à leur activité quotidienne.",
+    ],
+    cta: "Découvrir la gamme",
+    href: "/catalogue?cat=hygiene",
+    accent: "#2e8b6e",
+    bg: "linear-gradient(120deg,#0a2018 0%,#1a4a35 50%,#1B3266 100%)",
+  },
+  {
+    title: "EMBALLAGES POUR LA LIVRAISON",
+    subtitle: "Préparer. Présenter. Transporter.",
+    bullets: [
+      "Des solutions adaptées aux professionnels de la restauration et de la livraison : boîtes, bols, sachets, barquettes, pots à sauce et autres emballages.",
+    ],
+    cta: "Découvrir la gamme",
+    href: "/catalogue?cat=emballage-alimentaire",
+    accent: "#3DAAB5",
+    bg: "linear-gradient(120deg,#0a1e2a 0%,#0d3545 50%,#1B3266 100%)",
+  },
+  {
     title: "Des emballages pour tous vos besoins",
     sub: "Papier hygiène · Film alimentaire · Barquettes · Gobelets",
     cta: "Voir le catalogue",
