@@ -7,29 +7,6 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const SLIDES = [
   {
-    title: "Vos consommables professionnels, simplement.",
-    bullets: [
-      "Café, restaurant, snack, pâtisserie, hôtel… NPIT Packing vous propose les produits adaptés à votre activité.",
-      "Vous nous indiquez ce que vous consommez — nous vous proposons les références adaptées.",
-    ],
-    cta: "Voir le catalogue",
-    href: "/catalogue",
-    accent: "#3DAAB5",
-    bg: "linear-gradient(120deg,#0f2d4a 0%,#1B3266 100%)",
-  },
-  {
-    title: "PAPIER",
-    subtitle: "Le confort au quotidien, jusque dans les détails.",
-    bullets: [
-      "Des produits papier adaptés aux besoins quotidiens des professionnels : serviettes, essuie-tout, mouchoirs, papier hygiénique, zig-zag et autres consommables.",
-      "Pour votre établissement, nous vous aidons à identifier les références adaptées à votre consommation.",
-    ],
-    cta: "Voir les produits",
-    href: "/catalogue?cat=papier",
-    accent: "#7b4f2a",
-    bg: "linear-gradient(120deg,#2a1a0a 0%,#1B3266 100%)",
-  },
-  {
     title: "FILM ALIMENTAIRE",
     subtitle: "Protégez, conservez, préparez.",
     bullets: [
