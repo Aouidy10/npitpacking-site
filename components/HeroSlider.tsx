@@ -42,6 +42,29 @@ const SLIDES = [
     bg: "linear-gradient(120deg,#0a2a2a 0%,#1a5c63 100%)",
   },
   {
+    title: "ALUMINIUM",
+    subtitle: "Pratique, polyvalent et indispensable au quotidien.",
+    bullets: [
+      "Rouleaux aluminium et solutions adaptées aux besoins des professionnels de la restauration et de la préparation alimentaire.",
+    ],
+    cta: "Découvrir la gamme",
+    href: "/catalogue?cat=emballage-alimentaire",
+    accent: "#8a9bb0",
+    bg: "linear-gradient(120deg,#1a2a3a 0%,#1B3266 100%)",
+  },
+  {
+    title: "BARQUETTES",
+    subtitle: "De la cuisine à la livraison.",
+    bullets: [
+      "Des barquettes adaptées à la préparation, au conditionnement, au transport et à la présentation de vos produits.",
+      "Différentes formes, capacités et usages pour répondre aux besoins de chaque métier.",
+    ],
+    cta: "Découvrir la gamme",
+    href: "/catalogue?cat=emballage-alimentaire",
+    accent: "#3DAAB5",
+    bg: "linear-gradient(120deg,#0a1f2e 0%,#1a4a5a 100%)",
+  },
+  {
     title: "Des emballages pour tous vos besoins",
     sub: "Papier hygiène · Film alimentaire · Barquettes · Gobelets",
     cta: "Voir le catalogue",
