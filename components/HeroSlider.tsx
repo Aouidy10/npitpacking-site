@@ -7,22 +7,31 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const SLIDES = [
   {
+    title: "Vos consommables professionnels, simplement.",
+    bullets: [
+      "Café, restaurant, snack, pâtisserie, hôtel… NPIT Packing vous propose les produits adaptés à votre activité.",
+      "Vous nous indiquez ce que vous consommez — nous vous proposons les références adaptées.",
+    ],
+    cta: "Voir le catalogue",
+    href: "/catalogue",
+    accent: "#3DAAB5",
+    bg: "linear-gradient(120deg,#0f2d4a 0%,#1B3266 100%)",
+  },
+  {
     title: "Des emballages pour tous vos besoins",
     sub: "Papier hygiène · Film alimentaire · Barquettes · Gobelets",
     cta: "Voir le catalogue",
     href: "/catalogue",
     accent: "#1B3266",
     bg: "linear-gradient(120deg,#1B3266 0%,#152854 100%)",
-    align: "left",
   },
   {
-    title: "Livraison gratuite dans tout le Maroc",
+    title: "Livraison dans tout le Maroc",
     sub: "Casablanca · Rabat · Marrakech · Fès · Tanger et toutes les villes du Maroc",
     cta: "Commander maintenant",
     href: "/devis",
     accent: "#3DAAB5",
     bg: "linear-gradient(120deg,#1a5c63 0%,#1B3266 100%)",
-    align: "left",
   },
   {
     title: "Prix spéciaux pour commandes en gros",
@@ -31,7 +40,6 @@ const SLIDES = [
     href: "/devis",
     accent: "#C8A46E",
     bg: "linear-gradient(120deg,#3a2410 0%,#1B3266 100%)",
-    align: "left",
   },
 ];
 
@@ -83,7 +91,18 @@ export default function HeroSlider() {
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold leading-tight mb-4" style={{ textWrap: "balance" }}>
               {s.title}
             </h1>
-            <p className="text-white/70 text-sm md:text-base mb-8 leading-relaxed">{s.sub}</p>
+            {"bullets" in s && s.bullets ? (
+              <ul className="mb-8 space-y-3">
+                {s.bullets.map((b, i) => (
+                  <li key={i} className="flex items-start gap-2.5 text-white/80 text-sm md:text-base leading-relaxed">
+                    <span className="mt-1.5 w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: s.accent }} />
+                    {b}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-white/70 text-sm md:text-base mb-8 leading-relaxed">{"sub" in s ? s.sub : ""}</p>
+            )}
             <Link
               href={s.href}
               className="inline-block font-bold text-sm px-7 py-3 transition-all hover:opacity-90"
