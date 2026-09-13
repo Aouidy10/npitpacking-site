@@ -18,20 +18,36 @@ const SLIDES = [
     bg: "linear-gradient(120deg,#0f2d4a 0%,#1B3266 100%)",
   },
   {
+    title: "PAPIER",
+    subtitle: "Le confort au quotidien, jusque dans les détails.",
+    bullets: [
+      "Des produits papier adaptés aux besoins quotidiens des professionnels : serviettes, essuie-tout, mouchoirs, papier hygiénique, zig-zag et autres consommables.",
+      "Pour votre établissement, nous vous aidons à identifier les références adaptées à votre consommation.",
+    ],
+    cta: "Voir les produits",
+    href: "/catalogue?cat=papier",
+    accent: "#7b4f2a",
+    bg: "linear-gradient(120deg,#2a1a0a 0%,#1B3266 100%)",
+  },
+  {
+    title: "FILM ALIMENTAIRE",
+    subtitle: "Protégez, conservez, préparez.",
+    bullets: [
+      "Des films alimentaires adaptés aux besoins des professionnels de la restauration, de la préparation à la conservation.",
+      "Différents formats et usages pour répondre aux exigences de votre activité.",
+    ],
+    cta: "Découvrir la gamme",
+    href: "/catalogue?cat=emballage-alimentaire",
+    accent: "#3DAAB5",
+    bg: "linear-gradient(120deg,#0a2a2a 0%,#1a5c63 100%)",
+  },
+  {
     title: "Des emballages pour tous vos besoins",
     sub: "Papier hygiène · Film alimentaire · Barquettes · Gobelets",
     cta: "Voir le catalogue",
     href: "/catalogue",
     accent: "#1B3266",
     bg: "linear-gradient(120deg,#1B3266 0%,#152854 100%)",
-  },
-  {
-    title: "Livraison dans tout le Maroc",
-    sub: "Casablanca · Rabat · Marrakech · Fès · Tanger et toutes les villes du Maroc",
-    cta: "Commander maintenant",
-    href: "/devis",
-    accent: "#3DAAB5",
-    bg: "linear-gradient(120deg,#1a5c63 0%,#1B3266 100%)",
   },
   {
     title: "Prix spéciaux pour commandes en gros",
@@ -88,9 +104,14 @@ export default function HeroSlider() {
             >
               NPITPACKING — Division NPIT
             </span>
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold leading-tight mb-4" style={{ textWrap: "balance" }}>
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold leading-tight mb-1" style={{ textWrap: "balance" }}>
               {s.title}
             </h1>
+            {"subtitle" in s && s.subtitle && (
+              <p className="text-white/90 text-lg md:text-xl font-semibold mb-4" style={{ textWrap: "balance" }}>
+                {s.subtitle}
+              </p>
+            )}
             {"bullets" in s && s.bullets ? (
               <ul className="mb-8 space-y-3">
                 {s.bullets.map((b, i) => (
