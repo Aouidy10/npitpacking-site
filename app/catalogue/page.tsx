@@ -54,6 +54,17 @@ function CatalogueContent() {
     })();
   }, []);
 
+  // Catégories et sous-catégories qui ont au moins 1 produit
+  const catsAvecProduits = useMemo(() => {
+    const cats = new Set<string>();
+    const subs = new Set<string>(); // "cat::sub"
+    produits.forEach((p) => {
+      if (p.categorie) cats.add(p.categorie);
+      if (p.categorie && p.sousCategorie) subs.add(`${p.categorie}::${p.sousCategorie}`);
+    });
+    return { cats, subs };
+  }, [produits]);
+
   const handleMainCat = (slug: Categorie | "tous") => {
     setCategorie(slug);
     setSousCategorie("");
@@ -135,10 +146,13 @@ function CatalogueContent() {
         Tous les produits
       </button>
 
-      {/* Catégories avec sous-catégories */}
-      {CATEGORIES_CONFIG.map((cat) => {
+      {/* Catégories avec sous-catégories — seulement celles qui ont des produits */}
+      {CATEGORIES_CONFIG.filter((cat) => catsAvecProduits.cats.has(cat.slug)).map((cat) => {
         const isActive = categorie === cat.slug;
         const isOpen   = catOpen[cat.slug] ?? isActive;
+        const sousCatsAvecProduits = cat.sousCats.filter((sub) =>
+          catsAvecProduits.subs.has(`${cat.slug}::${sub.slug}`)
+        );
         return (
           <div key={cat.slug}>
             <button
@@ -153,13 +167,13 @@ function CatalogueContent() {
               )}
             >
               <span>{cat.label}</span>
-              {cat.sousCats.length > 0 && (
+              {sousCatsAvecProduits.length > 0 && (
                 <ChevronRight className={clsx("w-3.5 h-3.5 transition-transform", isOpen && "rotate-90")} />
               )}
             </button>
 
-            {/* Sous-catégories */}
-            {isOpen && cat.sousCats.map((sub) => (
+            {/* Sous-catégories — seulement celles qui ont des produits */}
+            {isOpen && sousCatsAvecProduits.map((sub) => (
               <button
                 key={sub.slug}
                 onClick={() => { setSousCategorie(sub.slug); setCategorie(cat.slug); setSidebarOpen(false); }}
