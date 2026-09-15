@@ -25,6 +25,7 @@ function CatalogueContent() {
   const searchParams = useSearchParams();
   const paramCat    = searchParams.get("cat") as Categorie | null;
   const paramSub    = searchParams.get("sub") ?? "";
+  const paramQ      = searchParams.get("q") ?? "";
   const paramActivite = searchParams.get("activite") ?? "";
 
   const activiteInfo   = getActivite(paramActivite);
@@ -37,7 +38,7 @@ function CatalogueContent() {
   const [sousCategorie, setSousCategorie] = useState<string>(paramSub);
   const [produits, setProduits]           = useState<Produit[]>(PRODUITS_DEMO);
   const [loading, setLoading]             = useState(true);
-  const [search, setSearch]               = useState("");
+  const [search, setSearch]               = useState(paramQ);
   const [tri, setTri]                     = useState("default");
   const [catOpen, setCatOpen]             = useState<Record<string, boolean>>({});
   const [sidebarOpen, setSidebarOpen]     = useState(false);
