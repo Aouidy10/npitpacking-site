@@ -68,6 +68,7 @@ function CatalogueContent() {
   const handleMainCat = (slug: Categorie | "tous") => {
     setCategorie(slug);
     setSousCategorie("");
+    setSearch("");
   };
 
   const toggleCatOpen = (slug: string) =>
@@ -176,7 +177,7 @@ function CatalogueContent() {
             {isOpen && sousCatsAvecProduits.map((sub) => (
               <button
                 key={sub.slug}
-                onClick={() => { setSousCategorie(sub.slug); setCategorie(cat.slug); setSidebarOpen(false); }}
+                onClick={() => { setSousCategorie(sub.slug); setCategorie(cat.slug); setSearch(""); setSidebarOpen(false); }}
                 className={clsx(
                   "w-full text-left text-xs py-1.5 pl-5 pr-2 flex items-center gap-1.5 transition-colors",
                   sousCategorie === sub.slug
